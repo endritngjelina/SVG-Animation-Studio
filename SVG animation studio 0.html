@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVG Animation Studio Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 300px 1fr 350px;
+            grid-template-rows: 60px 1fr 200px;
+            height: 100vh;
+            gap: 10px;
+            padding: 10px;
+        }
+
+        .header {
+            grid-column: 1 / -1;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn.secondary {
+            background: #6c757d;
+        }
+
+        .sidebar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+
+        .section {
+            margin-bottom: 25px;
+        }
+
+        .section h3 {
+            margin-bottom: 15px;
+            color: #495057;
+            font-size: 16px;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 5px;
+        }
+
+        .shape-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 8px;
+            border: none;
+            border-radius: 8px;
+            background: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .shape-btn:hover {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .shape-btn.active {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .canvas-area {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .canvas-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .canvas-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 2px dashed #dee2e6;
+            position: relative;
+        }
+
+        #svgCanvas {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .properties-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+
+        .timeline {
+            grid-column: 1 / -1;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .timeline-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
+        .timeline-track {
+            background: #f8f9fa;
+            height: 60px;
+            border-radius: 8px;
+            position: relative;
+            margin-bottom: 10px;
+            border: 1px solid #dee2e6;
+        }
+
+        .keyframe {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #667eea;
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .keyframe:hover {
+            transform: translateY(-50%) scale(1.3);
+            background: #764ba2;
+        }
+
+        .playhead {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #dc3545;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .color-picker {
+            display: flex;
+            gap: 5px;
+            margin-top: 5px;
+        }
+
+        .color-swatch {
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s ease;
+        }
+
+        .color-swatch:hover {
+            transform: scale(1.1);
+        }
+
+        .code-export {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .notification {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .layer-item {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .layer-item:hover {
+            background: #e9ecef;
+        }
+
+        .layer-item.selected {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .layer-controls {
+            display: flex;
+            gap: 5px;
+        }
+
+        .layer-btn {
+            padding: 4px 8px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.2);
+            color: currentColor;
+            font-size: 12px;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .recording {
+            animation: pulse 1s infinite;
+        }
+
+        .range-input {
+            width: 100%;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">SVG Animation Studio Pro</div>
+            <div class="controls">
+                <button class="btn" onclick="newProject()">New Project</button>
+                <button class="btn" onclick="exportAnimation()">Export SVG</button>
+                <button class="btn" onclick="exportCode()">Export Code</button>
+                <button class="btn secondary" onclick="previewAnimation()">Preview</button>
+            </div>
+        </header>
+
+        <aside class="sidebar">
+            <div class="section">
+                <h3>Shapes</h3>
+                <button class="shape-btn" onclick="addShape('rect')">Rectangle</button>
+                <button class="shape-btn" onclick="addShape('circle')">Circle</button>
+                <button class="shape-btn" onclick="addShape('ellipse')">Ellipse</button>
+                <button class="shape-btn" onclick="addShape('line')">Line</button>
+                <button class="shape-btn" onclick="addShape('polygon')">Polygon</button>
+                <button class="shape-btn" onclick="addShape('path')">Path</button>
+            </div>
+
+            <div class="section">
+                <h3>Animation Presets</h3>
+                <button class="shape-btn" onclick="addPresetAnimation('bounce')">Bounce</button>
+                <button class="shape-btn" onclick="addPresetAnimation('spin')">Spin</button>
+                <button class="shape-btn" onclick="addPresetAnimation('fade')">Fade In/Out</button>
+                <button class="shape-btn" onclick="addPresetAnimation('pulse')">Pulse</button>
+                <button class="shape-btn" onclick="addPresetAnimation('slide')">Slide</button>
+            </div>
+
+            <div class="section">
+                <h3>Layers</h3>
+                <div id="layerList"></div>
+            </div>
+        </aside>
+
+        <main class="canvas-area">
+            <div class="canvas-header">
+                <h3>Canvas</h3>
+                <div>
+                    <button class="btn secondary" onclick="zoomIn()">Zoom In</button>
+                    <button class="btn secondary" onclick="zoomOut()">Zoom Out</button>
+                    <button class="btn secondary" onclick="resetZoom()">Reset</button>
+                </div>
+            </div>
+            <div class="canvas-container">
+                <svg id="svgCanvas" width="600" height="400" viewBox="0 0 600 400">
+                    <defs>
+                        <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#e0e0e0" stroke-width="1"/>
+                        </pattern>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#grid)" opacity="0.3"/>
+                </svg>
+            </div>
+        </main>
+
+        <aside class="properties-panel">
+            <h3>Properties</h3>
+            <div id="propertiesContent">
+                <p>Select an element to edit its properties</p>
+            </div>
+
+            <div class="section">
+                <h3>Quick Colors</h3>
+                <div class="color-picker">
+                    <div class="color-swatch" style="background: #667eea" onclick="applyColor('#667eea')"></div>
+                    <div class="color-swatch" style="background: #764ba2" onclick="applyColor('#764ba2')"></div>
+                    <div class="color-swatch" style="background: #f093fb" onclick="applyColor('#f093fb')"></div>
+                    <div class="color-swatch" style="background: #f5576c" onclick="applyColor('#f5576c')"></div>
+                    <div class="color-swatch" style="background: #4facfe" onclick="applyColor('#4facfe')"></div>
+                    <div class="color-swatch" style="background: #43e97b" onclick="applyColor('#43e97b')"></div>
+                </div>
+            </div>
+
+            <div class="code-export">
+                <strong>Generated Code:</strong>
+                <pre id="codeOutput">// Select elements to see code</pre>
+            </div>
+        </aside>
+
+        <section class="timeline">
+            <div class="timeline-controls">
+                <button class="btn" onclick="playAnimation()" id="playBtn">Play</button>
+                <button class="btn secondary" onclick="pauseAnimation()">Pause</button>
+                <button class="btn secondary" onclick="stopAnimation()">Stop</button>
+                <button class="btn secondary" onclick="addKeyframe()" id="recordBtn">Add Keyframe</button>
+                <input type="range" class="range-input" min="0" max="100" value="0" id="timelineSlider" oninput="scrubTimeline(this.value)">
+                <span>Duration: <input type="number" value="3" min="0.1" max="10" step="0.1" id="durationInput" onchange="updateDuration()">s</span>
+            </div>
+            <div class="timeline-track" id="timelineTrack">
+                <div class="playhead" id="playhead"></div>
+            </div>
+        </section>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        let selectedElement = null;
+        let elements = [];
+        let currentTime = 0;
+        let isPlaying = false;
+        let animationDuration = 3;
+        let keyframes = {};
+        let elementCounter = 0;
+        let zoom = 1;
+        let isRecording = false;
+
+        const svg = document.getElementById('svgCanvas');
+        const timeline = document.getElementById('timelineTrack');
+        const playhead = document.getElementById('playhead');
+        const timelineSlider = document.getElementById('timelineSlider');
+
+        // Initialize
+        updateLayerList();
+
+        function addShape(type) {
+            elementCounter++;
+            const id = `element_${elementCounter}`;
+            let element;
+
+            const centerX = 300;
+            const centerY = 200;
+
+            switch(type) {
+                case 'rect':
+                    element = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    element.setAttribute('x', centerX - 50);
+                    element.setAttribute('y', centerY - 25);
+                    element.setAttribute('width', 100);
+                    element.setAttribute('height', 50);
+                    element.setAttribute('fill', '#667eea');
+                    break;
+                case 'circle':
+                    element = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    element.setAttribute('cx', centerX);
+                    element.setAttribute('cy', centerY);
+                    element.setAttribute('r', 40);
+                    element.setAttribute('fill', '#764ba2');
+                    break;
+                case 'ellipse':
+                    element = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+                    element.setAttribute('cx', centerX);
+                    element.setAttribute('cy', centerY);
+                    element.setAttribute('rx', 60);
+                    element.setAttribute('ry', 30);
+                    element.setAttribute('fill', '#f093fb');
+                    break;
+                case 'line':
+                    element = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    element.setAttribute('x1', centerX - 50);
+                    element.setAttribute('y1', centerY);
+                    element.setAttribute('x2', centerX + 50);
+                    element.setAttribute('y2', centerY);
+                    element.setAttribute('stroke', '#f5576c');
+                    element.setAttribute('stroke-width', 3);
+                    break;
+                case 'polygon':
+                    element = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                    const points = `${centerX},${centerY-40} ${centerX-35},${centerY+20} ${centerX+35},${centerY+20}`;
+                    element.setAttribute('points', points);
+                    element.setAttribute('fill', '#4facfe');
+                    break;
+                case 'path':
+                    element = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    element.setAttribute('d', `M${centerX-50},${centerY} Q${centerX},${centerY-50} ${centerX+50},${centerY}`);
+                    element.setAttribute('stroke', '#43e97b');
+                    element.setAttribute('stroke-width', 3);
+                    element.setAttribute('fill', 'none');
+                    break;
+            }
+
+            element.setAttribute('id', id);
+            element.style.cursor = 'pointer';
+            element.addEventListener('click', (e) => {
+                e.stopPropagation();
+                selectElement(element);
+            });
+
+            svg.appendChild(element);
+            elements.push({
+                id: id,
+                element: element,
+                type: type,
+                keyframes: []
+            });
+
+            keyframes[id] = [];
+            selectElement(element);
+            updateLayerList();
+            showNotification(`${type.charAt(0).toUpperCase() + type.slice(1)} added to canvas`);
+        }
+
+        function selectElement(element) {
+            // Remove previous selection highlight
+            const prevSelected = svg.querySelector('.selected');
+            if (prevSelected) {
+                prevSelected.classList.remove('selected');
+                prevSelected.style.stroke = prevSelected.getAttribute('data-original-stroke') || 'none';
+                prevSelected.style.strokeWidth = prevSelected.getAttribute('data-original-stroke-width') || '0';
+            }
+
+            selectedElement = element;
+            
+            // Highlight selected element
+            element.classList.add('selected');
+            element.setAttribute('data-original-stroke', element.style.stroke || element.getAttribute('stroke') || 'none');
+            element.setAttribute('data-original-stroke-width', element.style.strokeWidth || element.getAttribute('stroke-width') || '0');
+            element.style.stroke = '#ff6b6b';
+            element.style.strokeWidth = '2';
+            element.style.strokeDasharray = '5,5';
+
+            updatePropertiesPanel();
+            updateLayerList();
+        }
+
+        function updatePropertiesPanel() {
+            const panel = document.getElementById('propertiesContent');
+            if (!selectedElement) {
+                panel.innerHTML = '<p>Select an element to edit its properties</p>';
+                return;
+            }
+
+            const type = selectedElement.tagName.toLowerCase();
+            let html = `<div class="section"><h4>${type.charAt(0).toUpperCase() + type.slice(1)} Properties</h4>`;
+
+            // Common properties
+            html += `
+                <div class="input-group">
+                    <label>Fill Color</label>
+                    <input type="color" value="${selectedElement.getAttribute('fill') || '#000000'}" onchange="updateProperty('fill', this.value)">
+                </div>
+                <div class="input-group">
+                    <label>Stroke Color</label>
+                    <input type="color" value="${selectedElement.getAttribute('stroke') || '#000000'}" onchange="updateProperty('stroke', this.value)">
+                </div>
+                <div class="input-group">
+                    <label>Stroke Width</label>
+                    <input type="number" value="${selectedElement.getAttribute('stroke-width') || 1}" min="0" max="20" onchange="updateProperty('stroke-width', this.value)">
+                </div>
+                <div class="input-group">
+                    <label>Opacity</label>
+                    <input type="range" min="0" max="1" step="0.1" value="${selectedElement.getAttribute('opacity') || 1}" onchange="updateProperty('opacity', this.value)">
+                </div>
+            `;
+
+            // Type-specific properties
+            switch(type) {
+                case 'rect':
+                    html += `
+                        <div class="input-group">
+                            <label>X Position</label>
+                            <input type="number" value="${selectedElement.getAttribute('x')}" onchange="updateProperty('x', this.value)">
+                        </div>
+                        <div class="input-group">
+                            <label>Y Position</label>
+                            <input type="number" value="${selectedElement.getAttribute('y')}" onchange="updateProperty('y', this.value)">
+                        </div>
+                        <div class="input-group">
+                            <label>Width</label>
+                            <input type="number" value="${selectedElement.getAttribute('width')}" min="1" onchange="updateProperty('width', this.value)">
+                        </div>
+                        <div class="input-group">
+                            <label>Height</label>
+                            <input type="number" value="${selectedElement.getAttribute('height')}" min="1" onchange="updateProperty('height', this.value)">
+                        </div>
+                    `;
+                    break;
+                case 'circle':
+                    html += `
+                        <div class="input-group">
+                            <label>Center X</label>
+                            <input type="number" value="${selectedElement.getAttribute('cx')}" onchange="updateProperty('cx', this.value)">
+                        </div>
+                        <div class="input-group">
+                            <label>Center Y</label>
+                            <input type="number" value="${selectedElement.getAttribute('cy')}" onchange="updateProperty('cy', this.value)">
+                        </div>
+                        <div class="input-group">
+                            <label>Radius</label>
+                            <input type="number" value="${selectedElement.getAttribute('r')}" min="1" onchange="updateProperty('r', this.value)">
+                        </div>
+                    `;
+                    break;
+            }
+
+            html += `
+                <div class="section">
+                    <button class="btn" onclick="deleteElement()">Delete Element</button>
+                    <button class="btn secondary" onclick="duplicateElement()">Duplicate</button>
+                </div>
+            </div>`;
+
+            panel.innerHTML = html;
+            updateCodeOutput();
+        }
+
+        function updateProperty(prop, value) {
+            if (selectedElement) {
+                selectedElement.setAttribute(prop, value);
+                updateCodeOutput();
+                
+                if (isRecording) {
+                    addKeyframe();
+                }
+            }
+        }
+
+        function addPresetAnimation(type) {
+            if (!selectedElement) {
+                showNotification('Please select an element first');
+                return;
+            }
+
+            const id = selectedElement.getAttribute('id');
+            let animateElement;
+
+            switch(type) {
+                case 'bounce':
+                    animateElement = document.createElementNS('http://www.w3.org/2000/svg', 'animateTransform');
+                    animateElement.setAttribute('attributeName', 'transform');
+                    animateElement.setAttribute('type', 'translate');
+                    animateElement.setAttribute('values', '0,0; 0,-30; 0,0');
+                    animateElement.setAttribute('dur', `${animationDuration}s`);
+                    animateElement.setAttribute('repeatCount', 'indefinite');
+                    break;
+                case 'spin':
+                    animateElement = document.createElementNS('http://www.w3.org/2000/svg', 'animateTransform');
+                    animateElement.setAttribute('attributeName', 'transform');
+                    animateElement.setAttribute('type', 'rotate');
+                    const bbox = selectedElement.getBBox();
+                    const centerX = bbox.x + bbox.width / 2;
+                    const centerY = bbox.y + bbox.height / 2;
+                    animateElement.setAttribute('values', `0 ${centerX} ${centerY}; 360 ${centerX} ${centerY}`);
+                    animateElement.setAttribute('dur', `${animationDuration}s`);
+                    animateElement.setAttribute('repeatCount', 'indefinite');
+                    break;
+                case 'fade':
+                    animateElement = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+                    animateElement.setAttribute('attributeName', 'opacity');
+                    animateElement.setAttribute('values', '1; 0; 1');
+                    animateElement.setAttribute('dur', `${animationDuration}s`);
+                    animateElement.setAttribute('repeatCount', 'indefinite');
+                    break;
+                case 'pulse':
+                    animateElement = document.createElementNS('http://www.w3.org/2000/svg', 'animateTransform');
+                    animateElement.setAttribute('attributeName', 'transform');
+                    animateElement.setAttribute('type', 'scale');
+                    const bbox2 = selectedElement.getBBox();
+                    const centerX2 = bbox2.x + bbox2.width / 2;
+                    const centerY2 = bbox2.y + bbox2.height / 2;
+                    animateElement.setAttribute('values', '1; 1.2; 1');
+                    animateElement.setAttribute('dur', `${animationDuration}s`);
+                    animateElement.setAttribute('repeatCount', 'indefinite');
+                    selectedElement.style.transformOrigin = `${centerX2}px ${centerY2}px`;
+                    break;
+                case 'slide':
+                    animateElement = document.createElementNS('http://www.w3.org/2000/svg', 'animateTransform');
+                    animateElement.setAttribute('attributeName', 'transform');
+                    animateElement.setAttribute('type', 'translate');
+                    animateElement.setAttribute('values', '0,0; 100,0; 0,0');
+                    animateElement.setAttribute('dur', `${animationDuration}s`);
+                    animateElement.setAttribute('repeatCount', 'indefinite');
+                    break;
+            }
+
+            selectedElement.appendChild(animateElement);
+            showNotification(`${type.charAt(0).toUpperCase() + type.slice(1)} animation added`);
+            updateCodeOutput();
+        }
+
+        function playAnimation() {
+            if (isPlaying) return;
+            
+            isPlaying = true;
+            document.getElementById('playBtn').textContent = 'Playing...';
+            
+            const startTime = performance.now();
+            const duration = animationDuration * 1000;
+
+            function animate(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                currentTime = progress;
+                updateTimelinePosition(progress);
+                
+                if (progress < 1 && isPlaying) {
+                    requestAnimationFrame(animate);
+                } else {
+                    stopAnimation();
+                }
+            }
+            
+            requestAnimationFrame(animate);
+            showNotification('Animation started');
+        }
+
+        function pauseAnimation() {
+            isPlaying = false;
+            document.getElementById('playBtn').textContent = 'Play';
+        }
+
+        function stopAnimation() {
+            isPlaying = false;
+            currentTime = 0;
+            document.getElementById('playBtn').textContent = 'Play';
+            updateTimelinePosition(0);
+        }
+
+        function updateTimelinePosition(progress) {
+            const timelineWidth = timeline.offsetWidth;
+            playhead.style.left = `${progress * timelineWidth}px`;
+            timelineSlider.value = progress * 100;
+        }
+
+        function scrubTimeline(value) {
+            currentTime = value / 100;
+            updateTimelinePosition(currentTime);
+        }
+
+        function addKeyframe() {
+            if (!selectedElement) {
+                showNotification('Please select an element first');
+                return;
+            }
+
+            const id = selectedElement.getAttribute('id');
+            const time = currentTime;
+            
+            // Get current properties
+            const properties = {};
+            const attributes = selectedElement.attributes;
+            for (let i = 0; i < attributes.length; i++) {
+                const attr = attributes[i];
+                if (attr.name !== 'id' && attr.name !== 'class') {
+                    properties[attr.name] = attr.value;
+                }
+            }
+
+            if (!keyframes[id]) keyframes[id] = [];
+            
+            keyframes[id].push({
+                time: time,
+                properties: properties
+            });
+
+            // Add visual keyframe indicator
+            const keyframeEl = document.createElement('div');
+            keyframeEl.className = 'keyframe';
+            keyframeEl.style.left = `${time * timeline.offsetWidth}px`;
+            keyframeEl.title = `Keyframe at ${(time * animationDuration).toFixed(2)}s`;
+            keyframeEl.addEventListener('click', () => {
+                currentTime = time;
+                updateTimelinePosition(time);
+            });
+            timeline.appendChild(keyframeEl);
+
+            showNotification('Keyframe added');
+        }
+
+        function updateDuration() {
+            animationDuration = parseFloat(document.getElementById('durationInput').value);
+            
+            // Update all existing animations
+            const animations = svg.querySelectorAll('animate, animateTransform');
+            animations.forEach(anim => {
+                anim.setAttribute('dur', `${animationDuration}s`);
+            });
+        }
+
+        function deleteElement() {
+            if (!selectedElement) return;
+            
+            const id = selectedElement.getAttribute('id');
+            selectedElement.remove();
+            
+            // Remove from elements array
+            elements = elements.filter(el => el.id !== id);
+            
+            // Remove keyframes
+            delete keyframes[id];
+            
+            selectedElement = null;
+            updatePropertiesPanel();
+            updateLayerList();
+            showNotification('Element deleted');
+        }
+
+        function duplicateElement() {
+            if (!selectedElement) return;
+            
+            const clone = selectedElement.cloneNode(true);
+            elementCounter++;
+            const newId = `element_${elementCounter}`;
+            clone.setAttribute('id', newId);
+            
+            // Offset position slightly
+            const type = clone.tagName.toLowerCase();
+            if (type === 'rect') {
+                clone.setAttribute('x', parseInt(clone.getAttribute('x')) + 20);
+                clone.setAttribute('y', parseInt(clone.getAttribute('y')) + 20);
+            } else if (type === 'circle' || type === 'ellipse') {
+                clone.setAttribute('cx', parseInt(clone.getAttribute('cx')) + 20);
+                clone.setAttribute('cy', parseInt(clone.getAttribute('cy')) + 20);
+            }
+            
+            clone.addEventListener('click', (e) => {
+                e.stopPropagation();
+                selectElement(clone);
+            });
+            
+            svg.appendChild(clone);
+            elements.push({
+                id: newId,
+                element: clone,
+                type: type,
+                keyframes: []
+            });
+            
+            keyframes[newId] = [];
+            selectElement(clone);
+            updateLayerList();
+            showNotification('Element duplicated');
+        }
+
+        function updateLayerList() {
+            const layerList = document.getElementById('layerList');
+            layerList.innerHTML = '';
+            
+            elements.forEach((el, index) => {
+                const layerItem = document.createElement('div');
+                layerItem.className = 'layer-item';
+                if (selectedElement && selectedElement.getAttribute('id') === el.id) {
+                    layerItem.classList.add('selected');
+                }
+                
+                layerItem.innerHTML = `
+                    <span>${el.type.charAt(0).toUpperCase() + el.type.slice(1)} (${el.id})</span>
+                    <div class="layer-controls">
+                        <button class="layer-btn" onclick="toggleVisibility('${el.id}')">👁</button>
+                        <button class="layer-btn" onclick="moveLayer('${el.id}', 'up')">↑</button>
+                        <button class="layer-btn" onclick="moveLayer('${el.id}', 'down')">↓</button>
+                    </div>
+                `;
+                
+                layerItem.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('layer-btn')) return;
+                    selectElement(el.element);
+                });
+                
+                layerList.appendChild(layerItem);
+            });
+        }
+
+        function toggleVisibility(elementId) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                const currentOpacity = element.getAttribute('opacity') || '1';
+                element.setAttribute('opacity', currentOpacity === '1' ? '0.3' : '1');
+            }
+        }
+
+        function moveLayer(elementId, direction) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            
+            if (direction === 'up') {
+                const nextSibling = element.nextElementSibling;
+                if (nextSibling) {
+                    element.parentNode.insertBefore(nextSibling, element);
+                }
+            } else {
+                const prevSibling = element.previousElementSibling;
+                if (prevSibling && prevSibling.tagName !== 'defs') {
+                    element.parentNode.insertBefore(element, prevSibling);
+                }
+            }
+        }
+
+        function applyColor(color) {
+            if (selectedElement) {
+                selectedElement.setAttribute('fill', color);
+                updatePropertiesPanel();
+                showNotification(`Color applied: ${color}`);
+            }
+        }
+
+        function zoomIn() {
+            zoom = Math.min(zoom * 1.2, 3);
+            svg.style.transform = `scale(${zoom})`;
+        }
+
+        function zoomOut() {
+            zoom = Math.max(zoom / 1.2, 0.3);
+            svg.style.transform = `scale(${zoom})`;
+        }
+
+        function resetZoom() {
+            zoom = 1;
+            svg.style.transform = 'scale(1)';
+        }
+
+        function newProject() {
+            if (confirm('Start a new project? This will clear all current work.')) {
+                // Clear canvas
+                const elementsToRemove = svg.querySelectorAll(':not(defs):not(rect[fill="url(#grid)"])');
+                elementsToRemove.forEach(el => el.remove());
+                
+                // Reset variables
+                elements = [];
+                keyframes = {};
+                selectedElement = null;
+                currentTime = 0;
+                elementCounter = 0;
+                
+                // Clear timeline
+                timeline.querySelectorAll('.keyframe').forEach(kf => kf.remove());
+                
+                updatePropertiesPanel();
+                updateLayerList();
+                stopAnimation();
+                showNotification('New project started');
+            }
+        }
+
+        function exportAnimation() {
+            const svgClone = svg.cloneNode(true);
+            
+            // Remove grid and selection highlights
+            svgClone.querySelector('rect[fill="url(#grid)"]').remove();
+            svgClone.querySelectorAll('.selected').forEach(el => {
+                el.classList.remove('selected');
+                el.style.stroke = '';
+                el.style.strokeWidth = '';
+                el.style.strokeDasharray = '';
+            });
+            
+            const svgString = new XMLSerializer().serializeToString(svgClone);
+            const blob = new Blob([svgString], { type: 'image/svg+xml' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'animation.svg';
+            a.click();
+            
+            URL.revokeObjectURL(url);
+            showNotification('SVG exported successfully');
+        }
+
+        function exportCode() {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0,0,0,0.8); z-index: 2000; display: flex;
+                align-items: center; justify-content: center;
+            `;
+            
+            const content = document.createElement('div');
+            content.style.cssText = `
+                background: white; padding: 30px; border-radius: 12px;
+                max-width: 80%; max-height: 80%; overflow: auto;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            `;
+            
+            const svgClone = svg.cloneNode(true);
+            svgClone.querySelector('rect[fill="url(#grid)"]').remove();
+            svgClone.querySelectorAll('.selected').forEach(el => {
+                el.classList.remove('selected');
+                el.style.stroke = '';
+                el.style.strokeWidth = '';
+                el.style.strokeDasharray = '';
+            });
+            
+            const svgCode = new XMLSerializer().serializeToString(svgClone);
+            const formattedCode = svgCode.replace(/></g, '>\n<').replace(/\n\s*\n/g, '\n');
+            
+            content.innerHTML = `
+                <h3>Export Code</h3>
+                <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                    <button class="btn" onclick="copyToClipboard('${btoa(formattedCode)}')">Copy SVG</button>
+                    <button class="btn" onclick="downloadCode('${btoa(formattedCode)}', 'svg')">Download SVG</button>
+                    <button class="btn secondary" onclick="this.closest('[style*=\"position: fixed\"]').remove()">Close</button>
+                </div>
+                <textarea style="width: 100%; height: 300px; font-family: monospace; font-size: 12px;" readonly>${formattedCode}</textarea>
+            `;
+            
+            modal.appendChild(content);
+            document.body.appendChild(modal);
+            
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) modal.remove();
+            });
+        }
+
+        function copyToClipboard(encodedCode) {
+            const code = atob(encodedCode);
+            navigator.clipboard.writeText(code).then(() => {
+                showNotification('Code copied to clipboard');
+            });
+        }
+
+        function downloadCode(encodedCode, type) {
+            const code = atob(encodedCode);
+            const blob = new Blob([code], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `animation.${type}`;
+            a.click();
+            
+            URL.revokeObjectURL(url);
+        }
+
+        function previewAnimation() {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0,0,0,0.9); z-index: 2000; display: flex;
+                align-items: center; justify-content: center; flex-direction: column;
+            `;
+            
+            const svgClone = svg.cloneNode(true);
+            svgClone.querySelector('rect[fill="url(#grid)"]').remove();
+            svgClone.querySelectorAll('.selected').forEach(el => {
+                el.classList.remove('selected');
+                el.style.stroke = '';
+                el.style.strokeWidth = '';
+                el.style.strokeDasharray = '';
+            });
+            
+            svgClone.style.cssText = 'background: white; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);';
+            
+            const controls = document.createElement('div');
+            controls.style.cssText = 'margin-top: 20px; display: flex; gap: 10px;';
+            controls.innerHTML = `
+                <button class="btn" onclick="this.closest('[style*=\"position: fixed\"]').remove()">Close Preview</button>
+                <button class="btn secondary" onclick="window.open().document.write('<!DOCTYPE html><html><head><title>SVG Animation Preview</title></head><body style=\\'margin:0;padding:20px;display:flex;justify-content:center;align-items:center;min-height:100vh;background:#f0f0f0\\'>' + this.parentElement.previousElementSibling.outerHTML + '</body></html>')">Open in New Window</button>
+            `;
+            
+            modal.appendChild(svgClone);
+            modal.appendChild(controls);
+            document.body.appendChild(modal);
+            
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) modal.remove();
+            });
+        }
+
+        function updateCodeOutput() {
+            const codeOutput = document.getElementById('codeOutput');
+            if (!selectedElement) {
+                codeOutput.textContent = '// Select an element to see its code';
+                return;
+            }
+            
+            const element = selectedElement.cloneNode(true);
+            element.classList.remove('selected');
+            element.style.stroke = '';
+            element.style.strokeWidth = '';
+            element.style.strokeDasharray = '';
+            
+            const code = new XMLSerializer().serializeToString(element);
+            const formatted = code.replace(/></g, '>\n  <').replace(/\s+/g, ' ');
+            codeOutput.textContent = formatted;
+        }
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 'n':
+                        e.preventDefault();
+                        newProject();
+                        break;
+                    case 's':
+                        e.preventDefault();
+                        exportAnimation();
+                        break;
+                    case 'd':
+                        e.preventDefault();
+                        if (selectedElement) duplicateElement();
+                        break;
+                    case 'Delete':
+                    case 'Backspace':
+                        if (selectedElement) deleteElement();
+                        break;
+                }
+            }
+            
+            if (e.key === ' ') {
+                e.preventDefault();
+                if (isPlaying) {
+                    pauseAnimation();
+                } else {
+                    playAnimation();
+                }
+            }
+            
+            if (e.key === 'r' && selectedElement) {
+                isRecording = !isRecording;
+                const recordBtn = document.getElementById('recordBtn');
+                if (isRecording) {
+                    recordBtn.classList.add('recording');
+                    recordBtn.textContent = '⏺ Recording';
+                    showNotification('Recording mode ON - changes will create keyframes');
+                } else {
+                    recordBtn.classList.remove('recording');
+                    recordBtn.textContent = 'Add Keyframe';
+                    showNotification('Recording mode OFF');
+                }
+            }
+        });
+
+        // Canvas click to deselect
+        svg.addEventListener('click', (e) => {
+            if (e.target === svg || e.target.getAttribute('fill') === 'url(#grid)') {
+                if (selectedElement) {
+                    selectedElement.classList.remove('selected');
+                    selectedElement.style.stroke = selectedElement.getAttribute('data-original-stroke') || 'none';
+                    selectedElement.style.strokeWidth = selectedElement.getAttribute('data-original-stroke-width') || '0';
+                    selectedElement.style.strokeDasharray = '';
+                    selectedElement = null;
+                    updatePropertiesPanel();
+                    updateLayerList();
+                }
+            }
+        });
+
+        // Drag functionality
+        let isDragging = false;
+        let dragStart = { x: 0, y: 0 };
+        let elementStart = { x: 0, y: 0 };
+
+        svg.addEventListener('mousedown', (e) => {
+            if (selectedElement && e.target === selectedElement) {
+                isDragging = true;
+                dragStart.x = e.clientX;
+                dragStart.y = e.clientY;
+                
+                const type = selectedElement.tagName.toLowerCase();
+                if (type === 'rect') {
+                    elementStart.x = parseFloat(selectedElement.getAttribute('x') || 0);
+                    elementStart.y = parseFloat(selectedElement.getAttribute('y') || 0);
+                } else if (type === 'circle' || type === 'ellipse') {
+                    elementStart.x = parseFloat(selectedElement.getAttribute('cx') || 0);
+                    elementStart.y = parseFloat(selectedElement.getAttribute('cy') || 0);
+                }
+                
+                e.preventDefault();
+            }
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging && selectedElement) {
+                const dx = (e.clientX - dragStart.x) / zoom;
+                const dy = (e.clientY - dragStart.y) / zoom;
+                
+                const type = selectedElement.tagName.toLowerCase();
+                if (type === 'rect') {
+                    selectedElement.setAttribute('x', elementStart.x + dx);
+                    selectedElement.setAttribute('y', elementStart.y + dy);
+                } else if (type === 'circle' || type === 'ellipse') {
+                    selectedElement.setAttribute('cx', elementStart.x + dx);
+                    selectedElement.setAttribute('cy', elementStart.y + dy);
+                }
+                
+                updatePropertiesPanel();
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isDragging && isRecording) {
+                addKeyframe();
+            }
+            isDragging = false;
+        });
+
+        // Add some sample elements on load
+        setTimeout(() => {
+            addShape('rect');
+            setTimeout(() => {
+                addShape('circle');
+                selectElement(elements[0].element);
+            }, 100);
+        }, 500);
+
+        console.log('SVG Animation Studio Pro loaded successfully!');
+        console.log('Keyboard shortcuts:');
+        console.log('- Ctrl/Cmd + N: New project');
+        console.log('- Ctrl/Cmd + S: Export SVG');
+        console.log('- Ctrl/Cmd + D: Duplicate element');
+        console.log('- Space: Play/Pause animation');
+        console.log('- R: Toggle recording mode');
+        console.log('- Delete/Backspace: Delete selected element');
+    </script>
+</body>
+</html>
