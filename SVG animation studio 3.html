@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVG Animation Studio Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .studio-container {
+            display: grid;
+            grid-template-areas: 
+                "toolbar toolbar toolbar"
+                "shapes canvas properties"
+                "timeline timeline timeline";
+            grid-template-rows: 60px 1fr 200px;
+            grid-template-columns: 250px 1fr 300px;
+            height: 100vh;
+            gap: 1px;
+            background: #0a0a0a;
+        }
+
+        .toolbar {
+            grid-area: toolbar;
+            background: linear-gradient(90deg, #1e1e1e 0%, #2d2d30 100%);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            border-bottom: 2px solid #0078d4;
+            box-shadow: 0 2px 10px rgba(0, 120, 212, 0.3);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 18px;
+            font-weight: 600;
+            color: #0078d4;
+        }
+
+        .logo::before {
+            content: "⚡";
+            margin-right: 8px;
+            font-size: 24px;
+        }
+
+        .toolbar-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #0078d4 0%, #005a9e 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 120, 212, 0.4);
+        }
+
+        .btn.secondary {
+            background: linear-gradient(135deg, #6b6b6b 0%, #4a4a4a 100%);
+        }
+
+        .shapes-panel {
+            grid-area: shapes;
+            background: #1e1e1e;
+            border-right: 1px solid #333;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .panel-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #0078d4;
+            border-bottom: 2px solid #0078d4;
+            padding-bottom: 8px;
+        }
+
+        .shape-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .shape-btn {
+            background: #2d2d30;
+            border: 2px solid #404040;
+            border-radius: 8px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .shape-btn:hover {
+            border-color: #0078d4;
+            background: #404040;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 120, 212, 0.2);
+        }
+
+        .shape-btn.active {
+            border-color: #0078d4;
+            background: rgba(0, 120, 212, 0.1);
+        }
+
+        .shape-icon {
+            font-size: 24px;
+        }
+
+        .canvas-area {
+            grid-area: canvas;
+            background: #f8f9fa;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        #svg-canvas {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            cursor: crosshair;
+        }
+
+        .properties-panel {
+            grid-area: properties;
+            background: #1e1e1e;
+            border-left: 1px solid #333;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .property-group {
+            margin-bottom: 20px;
+        }
+
+        .property-label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #cccccc;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .property-input {
+            width: 100%;
+            background: #2d2d30;
+            border: 1px solid #404040;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .property-input:focus {
+            outline: none;
+            border-color: #0078d4;
+            box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.3);
+        }
+
+        .color-input {
+            width: 100%;
+            height: 40px;
+            border-radius: 4px;
+            border: 1px solid #404040;
+            background: transparent;
+        }
+
+        .timeline {
+            grid-area: timeline;
+            background: #1e1e1e;
+            border-top: 1px solid #333;
+            padding: 15px;
+        }
+
+        .timeline-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .play-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .play-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+        }
+
+        .timeline-slider {
+            flex: 1;
+            height: 6px;
+            background: #404040;
+            border-radius: 3px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .keyframes {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .keyframe {
+            background: #0078d4;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .keyframe:hover {
+            background: #106ebe;
+            transform: translateY(-2px);
+        }
+
+        .animation-controls {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .control-btn {
+            background: #2d2d30;
+            border: 1px solid #404040;
+            color: white;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .control-btn:hover {
+            background: #404040;
+            border-color: #0078d4;
+        }
+
+        .control-btn.active {
+            background: rgba(0, 120, 212, 0.2);
+            border-color: #0078d4;
+        }
+
+        .export-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .export-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .export-content {
+            background: #1e1e1e;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 2px solid #0078d4;
+        }
+
+        .code-output {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #f0f6fc;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            max-height: 400px;
+        }
+
+        .notification {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+            transform: translateX(400px);
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1001;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .selected-element {
+            stroke: #0078d4 !important;
+            stroke-width: 2 !important;
+            stroke-dasharray: 5 5 !important;
+            filter: drop-shadow(0 0 8px rgba(0, 120, 212, 0.6));
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .animating {
+            animation: pulse 2s infinite;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1e1e1e;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #404040;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #0078d4;
+        }
+    </style>
+</head>
+<body>
+    <div class="studio-container">
+        <div class="toolbar">
+            <div class="logo">SVG Animation Studio Pro</div>
+            <div class="toolbar-actions">
+                <button class="btn" onclick="clearCanvas()">New Project</button>
+                <button class="btn secondary" onclick="showExportModal()">Export</button>
+                <button class="btn secondary" onclick="saveProject()">Save</button>
+            </div>
+        </div>
+
+        <div class="shapes-panel">
+            <div class="panel-title">Shapes</div>
+            <div class="shape-grid">
+                <div class="shape-btn" data-shape="rect">
+                    <div class="shape-icon">⬜</div>
+                    <div>Rectangle</div>
+                </div>
+                <div class="shape-btn" data-shape="circle">
+                    <div class="shape-icon">⚪</div>
+                    <div>Circle</div>
+                </div>
+                <div class="shape-btn" data-shape="triangle">
+                    <div class="shape-icon">🔺</div>
+                    <div>Triangle</div>
+                </div>
+                <div class="shape-btn" data-shape="star">
+                    <div class="shape-icon">⭐</div>
+                    <div>Star</div>
+                </div>
+            </div>
+
+            <div class="panel-title">Tools</div>
+            <div class="animation-controls">
+                <button class="control-btn" data-action="move">Move</button>
+                <button class="control-btn" data-action="rotate">Rotate</button>
+                <button class="control-btn" data-action="scale">Scale</button>
+                <button class="control-btn" data-action="fade">Fade</button>
+                <button class="control-btn" data-action="bounce">Bounce</button>
+                <button class="control-btn" data-action="shake">Shake</button>
+            </div>
+        </div>
+
+        <div class="canvas-area">
+            <svg id="svg-canvas" width="800" height="500" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <filter id="glow">
+                        <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                        <feMerge> 
+                            <feMergeNode in="coloredBlur"/>
+                            <feMergeNode in="SourceGraphic"/> 
+                        </feMerge>
+                    </filter>
+                </defs>
+            </svg>
+        </div>
+
+        <div class="properties-panel">
+            <div class="panel-title">Properties</div>
+            
+            <div class="property-group">
+                <label class="property-label">Fill Color</label>
+                <input type="color" class="color-input" id="fill-color" value="#0078d4">
+            </div>
+
+            <div class="property-group">
+                <label class="property-label">Stroke Color</label>
+                <input type="color" class="color-input" id="stroke-color" value="#000000">
+            </div>
+
+            <div class="property-group">
+                <label class="property-label">Stroke Width</label>
+                <input type="range" class="property-input" id="stroke-width" min="0" max="10" value="2">
+            </div>
+
+            <div class="property-group">
+                <label class="property-label">Opacity</label>
+                <input type="range" class="property-input" id="opacity" min="0" max="1" step="0.1" value="1">
+            </div>
+
+            <div class="property-group">
+                <label class="property-label">Animation Duration (s)</label>
+                <input type="number" class="property-input" id="duration" min="0.1" max="10" step="0.1" value="2">
+            </div>
+
+            <div class="property-group">
+                <label class="property-label">Easing</label>
+                <select class="property-input" id="easing">
+                    <option value="ease">Ease</option>
+                    <option value="ease-in">Ease In</option>
+                    <option value="ease-out">Ease Out</option>
+                    <option value="ease-in-out">Ease In Out</option>
+                    <option value="linear">Linear</option>
+                    <option value="cubic-bezier(0.68, -0.55, 0.265, 1.55)">Bounce</option>
+                </select>
+            </div>
+
+            <div class="property-group">
+                <button class="btn" style="width: 100%" onclick="deleteSelected()">Delete Selected</button>
+            </div>
+        </div>
+
+        <div class="timeline">
+            <div class="panel-title" style="margin-bottom: 10px;">Animation Timeline</div>
+            <div class="timeline-controls">
+                <button class="play-btn" id="play-btn" onclick="toggleAnimation()">▶</button>
+                <input type="range" class="timeline-slider" id="timeline-slider" min="0" max="100" value="0">
+                <div style="color: #cccccc; min-width: 60px;">
+                    <span id="current-time">0.0s</span> / <span id="total-time">2.0s</span>
+                </div>
+            </div>
+            <div class="keyframes" id="keyframes-container">
+                <div class="keyframe">0s - Start</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="export-modal" id="export-modal">
+        <div class="export-content">
+            <h3 style="margin-bottom: 20px; color: #0078d4;">Export SVG Animation</h3>
+            <div class="code-output" id="code-output"></div>
+            <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">
+                <button class="btn secondary" onclick="hideExportModal()">Close</button>
+                <button class="btn" onclick="copyCode()">Copy Code</button>
+                <button class="btn" onclick="downloadSVG()">Download SVG</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification">
+        Action completed successfully!
+    </div>
+
+    <script>
+        class SVGAnimationStudio {
+            constructor() {
+                this.canvas = document.getElementById('svg-canvas');
+                this.selectedShape = null;
+                this.selectedElement = null;
+                this.isDrawing = false;
+                this.elementCounter = 0;
+                this.animations = [];
+                this.isPlaying = false;
+                this.currentTime = 0;
+                this.totalDuration = 2;
+                
+                this.initializeEventListeners();
+                this.updateTimeline();
+            }
+
+            initializeEventListeners() {
+                // Shape selection
+                document.querySelectorAll('.shape-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        document.querySelectorAll('.shape-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        this.selectedShape = btn.dataset.shape;
+                    });
+                });
+
+                // Canvas interactions
+                this.canvas.addEventListener('click', (e) => this.handleCanvasClick(e));
+                this.canvas.addEventListener('mousemove', (e) => this.handleCanvasHover(e));
+
+                // Property controls
+                document.getElementById('fill-color').addEventListener('change', (e) => this.updateSelectedProperty('fill', e.target.value));
+                document.getElementById('stroke-color').addEventListener('change', (e) => this.updateSelectedProperty('stroke', e.target.value));
+                document.getElementById('stroke-width').addEventListener('input', (e) => this.updateSelectedProperty('stroke-width', e.target.value));
+                document.getElementById('opacity').addEventListener('input', (e) => this.updateSelectedProperty('opacity', e.target.value));
+
+                // Animation controls
+                document.querySelectorAll('.control-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => this.applyAnimation(btn.dataset.action));
+                });
+
+                // Timeline slider
+                document.getElementById('timeline-slider').addEventListener('input', (e) => this.seekToTime(e.target.value));
+            }
+
+            handleCanvasClick(e) {
+                const rect = this.canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                // Check if clicking on existing element
+                const clickedElement = e.target;
+                if (clickedElement !== this.canvas) {
+                    this.selectElement(clickedElement);
+                    return;
+                }
+
+                // Create new shape
+                if (this.selectedShape) {
+                    this.createElement(this.selectedShape, x, y);
+                }
+
+                // Deselect if clicking on empty canvas
+                if (e.target === this.canvas) {
+                    this.deselectElement();
+                }
+            }
+
+            createElement(type, x, y) {
+                let element;
+                const id = `element_${this.elementCounter++}`;
+                const fillColor = document.getElementById('fill-color').value;
+                const strokeColor = document.getElementById('stroke-color').value;
+                const strokeWidth = document.getElementById('stroke-width').value;
+
+                switch (type) {
+                    case 'rect':
+                        element = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                        element.setAttribute('x', x - 50);
+                        element.setAttribute('y', y - 25);
+                        element.setAttribute('width', 100);
+                        element.setAttribute('height', 50);
+                        break;
+
+                    case 'circle':
+                        element = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                        element.setAttribute('cx', x);
+                        element.setAttribute('cy', y);
+                        element.setAttribute('r', 30);
+                        break;
+
+                    case 'triangle':
+                        element = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                        element.setAttribute('points', `${x},${y-30} ${x-30},${y+20} ${x+30},${y+20}`);
+                        break;
+
+                    case 'star':
+                        element = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                        const points = this.createStarPoints(x, y, 5, 25, 10);
+                        element.setAttribute('points', points);
+                        break;
+                }
+
+                if (element) {
+                    element.id = id;
+                    element.setAttribute('fill', fillColor);
+                    element.setAttribute('stroke', strokeColor);
+                    element.setAttribute('stroke-width', strokeWidth);
+                    element.style.cursor = 'pointer';
+                    
+                    this.canvas.appendChild(element);
+                    this.selectElement(element);
+                    this.showNotification(`${type.charAt(0).toUpperCase() + type.slice(1)} created!`);
+                }
+            }
+
+            createStarPoints(cx, cy, spikes, outerRadius, innerRadius) {
+                const points = [];
+                const step = Math.PI / spikes;
+
+                for (let i = 0; i < 2 * spikes; i++) {
+                    const radius = i % 2 === 0 ? outerRadius : innerRadius;
+                    const angle = i * step - Math.PI / 2;
+                    const x = cx + Math.cos(angle) * radius;
+                    const y = cy + Math.sin(angle) * radius;
+                    points.push(`${x},${y}`);
+                }
+
+                return points.join(' ');
+            }
+
+            selectElement(element) {
+                this.deselectElement();
+                this.selectedElement = element;
+                element.classList.add('selected-element');
+                
+                // Update property panel
+                this.updatePropertyPanel(element);
+                this.showNotification('Element selected');
+            }
+
+            deselectElement() {
+                if (this.selectedElement) {
+                    this.selectedElement.classList.remove('selected-element');
+                    this.selectedElement = null;
+                }
+            }
+
+            updatePropertyPanel(element) {
+                const fill = element.getAttribute('fill') || '#0078d4';
+                const stroke = element.getAttribute('stroke') || '#000000';
+                const strokeWidth = element.getAttribute('stroke-width') || '2';
+                const opacity = element.getAttribute('opacity') || '1';
+
+                document.getElementById('fill-color').value = fill;
+                document.getElementById('stroke-color').value = stroke;
+                document.getElementById('stroke-width').value = strokeWidth;
+                document.getElementById('opacity').value = opacity;
+            }
+
+            updateSelectedProperty(property, value) {
+                if (this.selectedElement) {
+                    this.selectedElement.setAttribute(property, value);
+                }
+            }
+
+            applyAnimation(type) {
+                if (!this.selectedElement) {
+                    this.showNotification('Please select an element first', 'warning');
+                    return;
+                }
+
+                const duration = parseFloat(document.getElementById('duration').value);
+                const easing = document.getElementById('easing').value;
+
+                // Remove existing animations
+                this.selectedElement.querySelectorAll('animateTransform, animate').forEach(anim => anim.remove());
+
+                let animElement;
+
+                switch (type) {
+                    case 'move':
+                        animElement = document.createElementNS('http://www.w3.org/2000/svg', 'animateTransform');
+                        animElement.setAttribute('attributeName', 'transform');
+                        animElement.setAttribute('type', 'translate');
+                        animElement.setAttribute('values', '0,0; 100,0; 0,0');
+                        animElement.setAttribute('dur', `${duration}s`);
+                        animElement.setAttribute('repeatCount', 'indefinite');
+                        break;
+
+                    case 'rotate':
+                        animElement = document.createElementNS('http://www.w3.org/2000/svg', 'animateTransform');
+                        animElement.setAttribute('attributeName', 'transform');
+                        animElement.setAttribute('type', 'rotate');
+                        animElement.setAttribute('values', '0; 360');
+                        animElement.setAttribute('dur', `${duration}s`);
+                        animElement.setAttribute('repeatCount', 'indefinite');
+                        break;
+
+                    case 'scale':
+                        animElement = document.createElementNS('http://www.w3.org/2000/svg', 'animateTransform');
+                        animElement.setAttribute('attributeName', 'transform');
+                        animElement.setAttribute('type', 'scale');
+                        animElement.setAttribute('values', '1; 1.5; 1');
+                        animElement.setAttribute('dur', `${duration}s`);
+                        animElement.setAttribute('repeatCount', 'indefinite');
+                        break;
+
+                    case 'fade':
+                        animElement = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+                        animElement.setAttribute('attributeName', 'opacity');
+                        animElement.setAttribute('values', '1; 0; 1');
+                        animElement.setAttribute('dur', `${duration}s`);
+                        animElement.setAttribute('repeatCount', 'indefinite');
+                        break;
+
+                    case 'bounce':
+                        animElement = document.createElementNS('http://www.w3.org/2000/svg', 'animateTransform');
+                        animElement.setAttribute('attributeName', 'transform');
+                        animElement.setAttribute('type', 'translate');
+                        animElement.setAttribute('values', '0,0; 0,-50; 0,0');
+                        animElement.setAttribute('dur', `${duration}s`);
+                        animElement.setAttribute('repeatCount', 'indefinite');
+                        break;
+
+                    case 'shake':
+                        animElement = document.createElementNS('http://www.w3.org/2000/svg', 'animateTransform');
+                        animElement.setAttribute('attributeName', 'transform');
+                        animElement.setAttribute('type', 'translate');
+                        animElement.setAttribute('values', '0,0; 5,0; -5,0; 0,0');
+                        animElement.setAttribute('dur', `${duration}s`);
+                        animElement.setAttribute('repeatCount', 'indefinite');
+                        break;
+                }
+
+                if (animElement) {
+                    this.selectedElement.appendChild(animElement);
+                    this.showNotification(`${type.charAt(0).toUpperCase() + type.slice(1)} animation applied!`);
+                    this.updateKeyframes();
+                }
+            }
+
+            updateKeyframes() {
+                const container = document.getElementById('keyframes-container');
+                const duration = parseFloat(document.getElementById('duration').value);
+                
+                container.innerHTML = `
+                    <div class="keyframe">0s - Start</div>
+                    <div class="keyframe">${(duration/2).toFixed(1)}s - Mid</div>
+                    <div class="keyframe">${duration.toFixed(1)}s - End</div>
+                `;
+                
+                this.totalDuration = duration;
+                document.getElementById('total-time').textContent = `${duration.toFixed(1)}s`;
+            }
+
+            toggleAnimation() {
+                const playBtn = document.getElementById('play-btn');
+                
+                if (this.isPlaying) {
+                    this.pauseAnimation();
+                    playBtn.textContent = '▶';
+                } else {
+                    this.playAnimation();
+                    playBtn.textContent = '⏸';
+                }
+                
+                this.isPlaying = !this.isPlaying;
+            }
+
+            playAnimation() {
+                // Start all SVG animations
+                this.canvas.querySelectorAll('animate, animateTransform').forEach(anim => {
+                    anim.beginElement();
+                });
+
+                // Update timeline
+                this.animationFrame = setInterval(() => {
+                    this.currentTime += 0.1;
+                    if (this.currentTime >= this.totalDuration) {
+                        this.currentTime = 0;
+                    }
+                    this.updateTimelineDisplay();
+                }, 100);
+            }
+
+            pauseAnimation() {
+                // Pause all SVG animations
+                this.canvas.querySelectorAll('animate, animateTransform').forEach(anim => {
+                    anim.endElement();
+                });
+
+                clearInterval(this.animationFrame);
+            }
+
+            updateTimelineDisplay() {
+                const progress = (this.currentTime / this.totalDuration) * 100;
+                document.getElementById('timeline-slider').value = progress;
+                document.getElementById('current-time').textContent = `${this.currentTime.toFixed(1)}s`;
+            }
+
+            seekToTime(progress) {
+                this.currentTime = (progress / 100) * this.totalDuration;
+                this.updateTimelineDisplay();
+            }
+
+            updateTimeline() {
+                setInterval(() => {
+                    if (this.isPlaying) {
+                        this.updateTimelineDisplay();
+                    }
+                }, 100);
+            }
+
+            deleteSelected() {
+                if (this.selectedElement) {
+                    this.selectedElement.remove();
+                    this.selectedElement = null;
+                    this.showNotification('Element deleted');
+                } else {
+                    this.showNotification('No element selected', 'warning');
+                }
+            }
+
+            showNotification(message, type = 'success') {
+                const notification = document.getElementById('notification');
+                notification.textContent = message;
+                notification.className = `notification ${type} show`;
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+
+            generateSVGCode() {
+                const svgClone = this.canvas.cloneNode(true);
+                
+                // Add proper XML declaration and styling
+                const svgString = `<?xml version="1.0" encoding="UTF-8"?>
+${svgClone.outerHTML}`;
+
+                return svgString;
+            }
+
+            exportProject() {
+                const svgCode = this.generateSVGCode();
+                const htmlTemplate = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVG Animation Export</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .animation-container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        svg {
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="animation-container">
+        <h1>SVG Animation Studio Export</h1>
+        ${svgCode}
+    </div>
+</body>
+</html>`;
+
+                return {
+                    svg: svgCode,
+                    html: htmlTemplate
+                };
+            }
+        }
+
+        // Global functions
+        function clearCanvas() {
+            const canvas = document.getElementById('svg-canvas');
+            // Keep the defs element but remove all other children
+            const defs = canvas.querySelector('defs');
+            canvas.innerHTML = '';
+            if (defs) {
+                canvas.appendChild(defs);
+            }
+            studio.selectedElement = null;
+            studio.showNotification('Canvas cleared');
+        }
+
+        function showExportModal() {
+            const modal = document.getElementById('export-modal');
+            const output = document.getElementById('code-output');
+            const exportData = studio.exportProject();
+            
+            output.textContent = exportData.html;
+            modal.classList.add('active');
+        }
+
+        function hideExportModal() {
+            document.getElementById('export-modal').classList.remove('active');
+        }
+
+        function copyCode() {
+            const output = document.getElementById('code-output');
+            navigator.clipboard.writeText(output.textContent).then(() => {
+                studio.showNotification('Code copied to clipboard!');
+            });
+        }
+
+        function downloadSVG() {
+            const exportData = studio.exportProject();
+            const blob = new Blob([exportData.html], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'svg-animation.html';
+            a.click();
+            URL.revokeObjectURL(url);
+            studio.showNotification('File downloaded!');
+        }
+
+        function saveProject() {
+            const projectData = {
+                timestamp: new Date().toISOString(),
+                canvas: studio.canvas.innerHTML,
+                version: '1.0'
+            };
+            
+            const blob = new Blob([JSON.stringify(projectData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'svg-animation-project.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            studio.showNotification('Project saved!');
+        }
+
+        function toggleAnimation() {
+            studio.toggleAnimation();
+        }
+
+        function deleteSelected() {
+            studio.deleteSelected();
+        }
+
+        // Initialize the application
+        const studio = new SVGAnimationStudio();
+
+        // Add some welcome elements
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                studio.showNotification('Welcome to SVG Animation Studio Pro! Click on a shape to get started.', 'success');
+            }, 1000);
+        });
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                switch (e.key) {
+                    case 's':
+                        e.preventDefault();
+                        saveProject();
+                        break;
+                    case 'e':
+                        e.preventDefault();
+                        showExportModal();
+                        break;
+                    case 'n':
+                        e.preventDefault();
+                        clearCanvas();
+                        break;
+                }
+            }
+            
+            if (e.key === 'Delete' && studio.selectedElement) {
+                deleteSelected();
+            }
+            
+            if (e.key === ' ') {
+                e.preventDefault();
+                toggleAnimation();
+            }
+        });
+
+        // Add responsive canvas behavior
+        function resizeCanvas() {
+            const canvasArea = document.querySelector('.canvas-area');
+            const rect = canvasArea.getBoundingClientRect();
+            const maxWidth = Math.min(800, rect.width - 40);
+            const maxHeight = Math.min(500, rect.height - 40);
+            
+            studio.canvas.setAttribute('width', maxWidth);
+            studio.canvas.setAttribute('height', maxHeight);
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // Add drag and drop functionality
+        let isDragging = false;
+        let dragOffset = { x: 0, y: 0 };
+
+        studio.canvas.addEventListener('mousedown', (e) => {
+            if (studio.selectedElement && e.target === studio.selectedElement) {
+                isDragging = true;
+                const rect = studio.canvas.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+                
+                // Calculate offset based on element type
+                let elementX, elementY;
+                if (studio.selectedElement.tagName === 'circle') {
+                    elementX = parseFloat(studio.selectedElement.getAttribute('cx')) || 0;
+                    elementY = parseFloat(studio.selectedElement.getAttribute('cy')) || 0;
+                } else if (studio.selectedElement.tagName === 'rect') {
+                    elementX = parseFloat(studio.selectedElement.getAttribute('x')) || 0;
+                    elementY = parseFloat(studio.selectedElement.getAttribute('y')) || 0;
+                } else {
+                    elementX = mouseX;
+                    elementY = mouseY;
+                }
+                
+                dragOffset.x = mouseX - elementX;
+                dragOffset.y = mouseY - elementY;
+                
+                studio.canvas.style.cursor = 'grabbing';
+            }
+        });
+
+        studio.canvas.addEventListener('mousemove', (e) => {
+            if (isDragging && studio.selectedElement) {
+                const rect = studio.canvas.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left - dragOffset.x;
+                const mouseY = e.clientY - rect.top - dragOffset.y;
+                
+                // Update element position based on type
+                if (studio.selectedElement.tagName === 'circle') {
+                    studio.selectedElement.setAttribute('cx', mouseX);
+                    studio.selectedElement.setAttribute('cy', mouseY);
+                } else if (studio.selectedElement.tagName === 'rect') {
+                    studio.selectedElement.setAttribute('x', mouseX);
+                    studio.selectedElement.setAttribute('y', mouseY);
+                } else if (studio.selectedElement.tagName === 'polygon') {
+                    // For polygons, we need to translate the entire points string
+                    const currentTransform = studio.selectedElement.getAttribute('transform') || '';
+                    const translateMatch = currentTransform.match(/translate\(([^)]+)\)/);
+                    let newTransform;
+                    
+                    if (translateMatch) {
+                        newTransform = currentTransform.replace(/translate\([^)]+\)/, `translate(${mouseX}, ${mouseY})`);
+                    } else {
+                        newTransform = `translate(${mouseX}, ${mouseY}) ${currentTransform}`;
+                    }
+                    
+                    studio.selectedElement.setAttribute('transform', newTransform.trim());
+                }
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+                studio.canvas.style.cursor = 'crosshair';
+                studio.showNotification('Element moved');
+            }
+        });
+
+        // Add context menu for advanced options
+        studio.canvas.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            if (studio.selectedElement) {
+                const contextMenu = document.createElement('div');
+                contextMenu.style.cssText = `
+                    position: fixed;
+                    top: ${e.clientY}px;
+                    left: ${e.clientX}px;
+                    background: #1e1e1e;
+                    border: 1px solid #404040;
+                    border-radius: 6px;
+                    padding: 8px 0;
+                    z-index: 1000;
+                    color: white;
+                    font-size: 14px;
+                    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+                `;
+
+                const menuItems = [
+                    { label: 'Duplicate', action: () => duplicateElement() },
+                    { label: 'Bring to Front', action: () => bringToFront() },
+                    { label: 'Send to Back', action: () => sendToBack() },
+                    { label: 'Add Glow Effect', action: () => addGlowEffect() },
+                    { label: 'Remove Effects', action: () => removeEffects() }
+                ];
+
+                menuItems.forEach(item => {
+                    const menuItem = document.createElement('div');
+                    menuItem.textContent = item.label;
+                    menuItem.style.cssText = `
+                        padding: 8px 16px;
+                        cursor: pointer;
+                        transition: background 0.2s;
+                    `;
+                    menuItem.addEventListener('mouseover', () => {
+                        menuItem.style.background = '#404040';
+                    });
+                    menuItem.addEventListener('mouseout', () => {
+                        menuItem.style.background = 'transparent';
+                    });
+                    menuItem.addEventListener('click', () => {
+                        item.action();
+                        document.body.removeChild(contextMenu);
+                    });
+                    contextMenu.appendChild(menuItem);
+                });
+
+                document.body.appendChild(contextMenu);
+
+                // Remove menu on click outside
+                setTimeout(() => {
+                    document.addEventListener('click', function removeMenu() {
+                        if (document.body.contains(contextMenu)) {
+                            document.body.removeChild(contextMenu);
+                        }
+                        document.removeEventListener('click', removeMenu);
+                    });
+                }, 100);
+            }
+        });
+
+        // Context menu functions
+        function duplicateElement() {
+            if (studio.selectedElement) {
+                const clone = studio.selectedElement.cloneNode(true);
+                clone.id = `element_${studio.elementCounter++}`;
+                
+                // Offset the clone slightly
+                if (clone.tagName === 'circle') {
+                    const cx = parseFloat(clone.getAttribute('cx')) + 20;
+                    const cy = parseFloat(clone.getAttribute('cy')) + 20;
+                    clone.setAttribute('cx', cx);
+                    clone.setAttribute('cy', cy);
+                } else if (clone.tagName === 'rect') {
+                    const x = parseFloat(clone.getAttribute('x')) + 20;
+                    const y = parseFloat(clone.getAttribute('y')) + 20;
+                    clone.setAttribute('x', x);
+                    clone.setAttribute('y', y);
+                }
+                
+                studio.canvas.appendChild(clone);
+                studio.selectElement(clone);
+                studio.showNotification('Element duplicated');
+            }
+        }
+
+        function bringToFront() {
+            if (studio.selectedElement) {
+                studio.canvas.appendChild(studio.selectedElement);
+                studio.showNotification('Brought to front');
+            }
+        }
+
+        function sendToBack() {
+            if (studio.selectedElement) {
+                const defs = studio.canvas.querySelector('defs');
+                if (defs) {
+                    studio.canvas.insertBefore(studio.selectedElement, defs.nextSibling);
+                } else {
+                    studio.canvas.insertBefore(studio.selectedElement, studio.canvas.firstChild);
+                }
+                studio.showNotification('Sent to back');
+            }
+        }
+
+        function addGlowEffect() {
+            if (studio.selectedElement) {
+                studio.selectedElement.setAttribute('filter', 'url(#glow)');
+                studio.showNotification('Glow effect added');
+            }
+        }
+
+        function removeEffects() {
+            if (studio.selectedElement) {
+                studio.selectedElement.removeAttribute('filter');
+                studio.showNotification('Effects removed');
+            }
+        }
+    </script>
+</body>
+</html>
