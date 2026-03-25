@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVG Animation Studio Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #5e35b1;
+            --primary-dark: #4527a0;
+            --secondary: #26c6da;
+            --accent: #ff4081;
+            --dark: #263238;
+            --light: #f5f7fa;
+            --success: #00c853;
+            --warning: #ffab00;
+            --danger: #ff5252;
+            --gray: #78909c;
+            --canvas-bg: #f0f4f8;
+            --sidebar-bg: linear-gradient(180deg, var(--dark) 0%, #37474f 100%);
+            --header-bg: linear-gradient(90deg, var(--dark) 0%, #455a64 100%);
+            --timeline-bg: #37474f;
+            --panel-bg: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .app-container {
+            width: 95%;
+            height: 95%;
+            background: rgba(255, 255, 255, 0.97);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 280px;
+            background: var(--sidebar-bg);
+            color: white;
+            padding: 20px 15px;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: var(--secondary);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .sidebar h2 {
+            font-weight: 700;
+            font-size: 20px;
+        }
+
+        .tool-section {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .tool-section h3 {
+            margin-bottom: 15px;
+            color: var(--secondary);
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tool-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .tool-btn, .action-btn {
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .tool-btn:hover, .action-btn:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .tool-btn.active {
+            background: var(--accent);
+            border-color: rgba(255,255,255,0.3);
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 12px;
+            color: #b0bec5;
+        }
+
+        .control-group input, .control-group select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 6px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            font-size: 14px;
+        }
+
+        .control-group input::placeholder {
+            color: rgba(255,255,255,0.6);
+        }
+
+        .color-input {
+            height: 40px;
+            padding: 2px;
+            cursor: pointer;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: var(--header-bg);
+            color: white;
+            padding: 12px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .header-btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .header-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .workspace {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+            background: var(--canvas-bg);
+            position: relative;
+        }
+
+        .canvas-area {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .canvas-container {
+            position: relative;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            background: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        #svgCanvas {
+            display: block;
+            border-radius: 10px;
+        }
+
+        .properties-panel {
+            width: 280px;
+            background: var(--panel-bg);
+            border-left: 1px solid #e0e0e0;
+            padding: 20px;
+            overflow-y: auto;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.05);
+        }
+
+        .properties-panel h3 {
+            margin-bottom: 15px;
+            color: var(--dark);
+            font-size: 18px;
+            border-bottom: 2px solid #eceff1;
+            padding-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Timeline Styles */
+        .timeline {
+            background: var(--timeline-bg);
+            color: white;
+            padding: 12px 20px;
+            border-top: 1px solid #455a64;
+        }
+
+        .timeline-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .timeline-header h4 {
+            color: #eceff1;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .timeline-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .timeline-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: var(--primary);
+            color: white;
+            font-size: 12px;
+            font-weight: 500;
+            transition: background 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .timeline-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .timeline-btn.active {
+            background: var(--accent);
+        }
+
+        .timeline-scrubber {
+            width: 100%;
+            height: 40px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 6px;
+            position: relative;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .scrubber-track {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 0%;
+            background: var(--secondary);
+            opacity: 0.3;
+        }
+
+        .scrubber-handle {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 16px;
+            height: 100%;
+            background: var(--accent);
+            cursor: pointer;
+            border-radius: 2px;
+            transform: translateX(-50%);
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+        }
+
+        .keyframe-track {
+            background: rgba(255,255,255,0.1);
+            border-radius: 6px;
+            padding: 10px;
+            margin: 8px 0;
+            min-height: 40px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .keyframe-track-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .keyframes {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .keyframe {
+            width: 20px;
+            height: 20px;
+            background: var(--secondary);
+            border-radius: 50%;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .keyframe:hover::after {
+            content: attr(data-time);
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            white-space: nowrap;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            max-width: 700px;
+            width: 90%;
+            max-height: 90%;
+            overflow-y: auto;
+        }
+
+        .modal h3 {
+            margin-bottom: 20px;
+            color: var(--dark);
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .code-output {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Fira Code', 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            overflow-x: auto;
+            white-space: pre;
+            margin: 15px 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .modal-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        /* Notification Styles */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--success);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        /* Grid & Handles */
+        .grid-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.1;
+            background-image: 
+                linear-gradient(to right, #000 1px, transparent 1px),
+                linear-gradient(to bottom, #000 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .transform-handles {
+            position: absolute;
+            pointer-events: none;
+        }
+
+        .handle {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: var(--secondary);
+            border: 2px solid white;
+            border-radius: 50%;
+            cursor: pointer;
+            pointer-events: all;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+
+        .handle:hover {
+            background: var(--primary);
+            transform: scale(1.2);
+        }
+
+        .rotate-handle {
+            width: 16px;
+            height: 16px;
+            background: var(--accent);
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .recording {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes highlight {
+            0% { box-shadow: 0 0 0 0 rgba(38, 198, 218, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(38, 198, 218, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(38, 198, 218, 0); }
+        }
+
+        .highlight {
+            animation: highlight 1.5s ease;
+        }
+
+        /* Property Panel */
+        .property-group {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .property-group h4 {
+            margin-bottom: 12px;
+            color: var(--dark);
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .property-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+            align-items: center;
+        }
+
+        .property-row label {
+            min-width: 80px;
+            font-size: 13px;
+            color: #546e7a;
+        }
+
+        .property-row input, .property-row select {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .property-row input[type="color"] {
+            height: 36px;
+            padding: 2px;
+        }
+
+        .delete-btn {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        /* Tutorial Overlay */
+        .tutorial-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: white;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .tutorial-content {
+            max-width: 600px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 30px;
+        }
+
+        .tutorial-content h2 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: var(--secondary);
+        }
+
+        .tutorial-content p {
+            margin-bottom: 20px;
+            line-height: 1.6;
+            font-size: 18px;
+        }
+
+        .tutorial-btn {
+            padding: 12px 25px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="container">
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <div class="logo">
+                        <i class="fas fa-paint-brush"></i>
+                    </div>
+                    <h2>SVG Animation Studio Pro</h2>
+                </div>
+                
+                <div class="tool-section">
+                    <h3><i class="fas fa-pencil-alt"></i> Drawing Tools</h3>
+                    <div class="tool-grid">
+                        <button class="tool-btn active" data-tool="select"><i class="fas fa-mouse-pointer"></i> Select</button>
+                        <button class="tool-btn" data-tool="rectangle"><i class="far fa-square"></i> Rectangle</button>
+                        <button class="tool-btn" data-tool="circle"><i class="far fa-circle"></i> Circle</button>
+                        <button class="tool-btn" data-tool="line"><i class="fas fa-minus"></i> Line</button>
+                        <button class="tool-btn" data-tool="path"><i class="fas fa-draw-polygon"></i> Path</button>
+                        <button class="tool-btn" data-tool="text"><i class="fas fa-font"></i> Text</button>
+                    </div>
+                </div>
+
+                <div class="tool-section">
+                    <h3><i class="fas fa-sliders-h"></i> Shape Properties</h3>
+                    <div class="control-group">
+                        <label>Fill Color</label>
+                        <input type="color" class="color-input" id="fillColor" value="#3498db">
+                    </div>
+                    <div class="control-group">
+                        <label>Stroke Color</label>
+                        <input type="color" class="color-input" id="strokeColor" value="#2c3e50">
+                    </div>
+                    <div class="control-group">
+                        <label>Stroke Width</label>
+                        <input type="range" id="strokeWidth" min="0" max="10" value="2">
+                    </div>
+                    <div class="control-group">
+                        <label>Opacity</label>
+                        <input type="range" id="opacity" min="0" max="1" step="0.1" value="1">
+                    </div>
+                </div>
+
+                <div class="tool-section">
+                    <h3><i class="fas fa-film"></i> Animation</h3>
+                    <div class="control-group">
+                        <label>Duration (seconds)</label>
+                        <input type="number" id="duration" min="0.1" max="10" step="0.1" value="1">
+                    </div>
+                    <div class="control-group">
+                        <label>Easing</label>
+                        <select id="easing">
+                            <option value="ease">Ease</option>
+                            <option value="linear">Linear</option>
+                            <option value="ease-in">Ease In</option>
+                            <option value="ease-out">Ease Out</option>
+                            <option value="ease-in-out">Ease In Out</option>
+                            <option value="cubic-bezier(0.68, -0.55, 0.27, 1.55)">Bounce</option>
+                        </select>
+                    </div>
+                    <button class="action-btn" id="addKeyframe"><i class="fas fa-key"></i> Add Keyframe</button>
+                </div>
+
+                <div class="tool-section">
+                    <h3><i class="fas fa-palette"></i> Canvas</h3>
+                    <div class="control-group">
+                        <label>Width</label>
+                        <input type="number" id="canvasWidth" value="800">
+                    </div>
+                    <div class="control-group">
+                        <label>Height</label>
+                        <input type="number" id="canvasHeight" value="600">
+                    </div>
+                    <button class="action-btn" id="toggleGrid"><i class="fas fa-border-style"></i> Toggle Grid</button>
+                    <button class="action-btn" id="clearCanvas"><i class="fas fa-trash-alt"></i> Clear All</button>
+                </div>
+            </div>
+
+            <div class="main-content">
+                <div class="header">
+                    <h1><i class="fas fa-magic"></i> SVG Animation Studio Pro</h1>
+                    <div class="header-controls">
+                        <button class="header-btn" id="previewBtn"><i class="fas fa-play"></i> Preview</button>
+                        <button class="header-btn" id="exportBtn"><i class="fas fa-file-export"></i> Export</button>
+                        <button class="header-btn" id="saveProject"><i class="fas fa-save"></i> Save Project</button>
+                        <button class="header-btn" id="loadProject"><i class="fas fa-folder-open"></i> Load Project</button>
+                    </div>
+                </div>
+
+                <div class="workspace">
+                    <div class="canvas-area">
+                        <div class="canvas-container">
+                            <svg id="svgCanvas" width="800" height="600" viewBox="0 0 800 600">
+                                <defs>
+                                    <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                                        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#e0e0e0" stroke-width="1"/>
+                                    </pattern>
+                                    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="#f5f7fa" />
+                                        <stop offset="100%" stop-color="#e4e7eb" />
+                                    </linearGradient>
+                                    <filter id="dropshadow" height="130%">
+                                        <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
+                                        <feOffset dx="2" dy="2" result="offsetblur" />
+                                        <feComponentTransfer>
+                                            <feFuncA type="linear" slope="0.2" />
+                                        </feComponentTransfer>
+                                        <feMerge> 
+                                            <feMergeNode />
+                                            <feMergeNode in="SourceGraphic" /> 
+                                        </feMerge>
+                                    </filter>
+                                </defs>
+                                <rect width="100%" height="100%" fill="url(#bg-gradient)" />
+                                <rect id="gridOverlay" width="100%" height="100%" fill="url(#grid)" opacity="0.3" />
+                                
+                                <!-- Sample elements for demo -->
+                                <rect id="demoRect" x="300" y="250" width="200" height="100" rx="10" fill="#5e35b1" stroke="#4527a0" stroke-width="2" filter="url(#dropshadow)" />
+                                <circle id="demoCircle" cx="400" cy="300" r="60" fill="#26c6da" stroke="#00838f" stroke-width="2" filter="url(#dropshadow)" />
+                                <text id="demoText" x="400" y="320" font-family="Arial" font-size="24" fill="white" text-anchor="middle" filter="url(#dropshadow)">SVG Studio</text>
+                            </svg>
+                            <div class="transform-handles" id="transformHandles"></div>
+                        </div>
+                    </div>
+
+                    <div class="properties-panel">
+                        <h3><i class="fas fa-cog"></i> Element Properties</h3>
+                        <div id="propertiesContent">
+                            <div class="property-group">
+                                <h4><i class="fas fa-cube"></i> Shape Properties</h4>
+                                <div class="property-row">
+                                    <label>ID:</label>
+                                    <input type="text" value="demoRect" readonly>
+                                </div>
+                                <div class="property-row">
+                                    <label>Type:</label>
+                                    <input type="text" value="Rectangle" readonly>
+                                </div>
+                                <div class="property-row">
+                                    <label>X:</label>
+                                    <input type="number" value="300">
+                                </div>
+                                <div class="property-row">
+                                    <label>Y:</label>
+                                    <input type="number" value="250">
+                                </div>
+                                <div class="property-row">
+                                    <label>Width:</label>
+                                    <input type="number" value="200">
+                                </div>
+                                <div class="property-row">
+                                    <label>Height:</label>
+                                    <input type="number" value="100">
+                                </div>
+                            </div>
+                            
+                            <div class="property-group">
+                                <h4><i class="fas fa-paint-brush"></i> Style</h4>
+                                <div class="property-row">
+                                    <label>Fill:</label>
+                                    <input type="color" value="#5e35b1">
+                                </div>
+                                <div class="property-row">
+                                    <label>Stroke:</label>
+                                    <input type="color" value="#4527a0">
+                                </div>
+                                <div class="property-row">
+                                    <label>Stroke Width:</label>
+                                    <input type="range" min="0" max="10" value="2">
+                                </div>
+                                <div class="property-row">
+                                    <label>Opacity:</label>
+                                    <input type="range" min="0" max="1" step="0.1" value="1">
+                                </div>
+                            </div>
+                            
+                            <div class="property-group">
+                                <h4><i class="fas fa-film"></i> Animation</h4>
+                                <div class="property-row">
+                                    <label>Position:</label>
+                                    <select>
+                                        <option>None</option>
+                                        <option selected>Move</option>
+                                        <option>Bounce</option>
+                                    </select>
+                                </div>
+                                <div class="property-row">
+                                    <label>Rotation:</label>
+                                    <select>
+                                        <option selected>None</option>
+                                        <option>Spin</option>
+                                        <option>Rotate 90°</option>
+                                    </select>
+                                </div>
+                                <div class="property-row">
+                                    <label>Scale:</label>
+                                    <select>
+                                        <option selected>None</option>
+                                        <option>Pulse</option>
+                                        <option>Grow</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <button class="delete-btn">
+                                <i class="fas fa-trash-alt"></i> Delete Element
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="timeline">
+                    <div class="timeline-header">
+                        <h4><i class="fas fa-film"></i> Animation Timeline</h4>
+                        <div class="timeline-controls">
+                            <button class="timeline-btn" id="playBtn"><i class="fas fa-play"></i> Play</button>
+                            <button class="timeline-btn" id="pauseBtn"><i class="fas fa-pause"></i> Pause</button>
+                            <button class="timeline-btn" id="stopBtn"><i class="fas fa-stop"></i> Stop</button>
+                            <button class="timeline-btn" id="recordBtn"><i class="fas fa-circle"></i> Record</button>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-scrubber">
+                        <div class="scrubber-track"></div>
+                        <div class="scrubber-handle"></div>
+                    </div>
+                    
+                    <div id="keyframeTracks">
+                        <div class="keyframe-track">
+                            <div class="keyframe-track-header">
+                                <strong>Rectangle</strong>
+                                <span>3 keyframes</span>
+                            </div>
+                            <div class="keyframes">
+                                <div class="keyframe" data-time="0s"></div>
+                                <div class="keyframe" data-time="1.2s"></div>
+                                <div class="keyframe" data-time="3.5s"></div>
+                            </div>
+                        </div>
+                        <div class="keyframe-track">
+                            <div class="keyframe-track-header">
+                                <strong>Circle</strong>
+                                <span>2 keyframes</span>
+                            </div>
+                            <div class="keyframes">
+                                <div class="keyframe" data-time="0s"></div>
+                                <div class="keyframe" data-time="2.8s"></div>
+                            </div>
+                        </div>
+                        <div class="keyframe-track">
+                            <div class="keyframe-track-header">
+                                <strong>Text</strong>
+                                <span>4 keyframes</span>
+                            </div>
+                            <div class="keyframes">
+                                <div class="keyframe" data-time="0s"></div>
+                                <div class="keyframe" data-time="0.8s"></div>
+                                <div class="keyframe" data-time="1.7s"></div>
+                                <div class="keyframe" data-time="3.2s"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div id="exportModal" class="modal">
+        <div class="modal-content">
+            <button class="close-btn">&times;</button>
+            <h3><i class="fas fa-file-export"></i> Export SVG Animation</h3>
+            <div class="control-group">
+                <label>Export Format</label>
+                <select id="exportFormat">
+                    <option value="svg">SVG with CSS Animation</option>
+                    <option value="html">Complete HTML Page</option>
+                    <option value="css">CSS Animation Only</option>
+                    <option value="react">React Component</option>
+                </select>
+            </div>
+            <div class="code-output" id="exportCode">// Generated SVG code will appear here
+&lt;svg width="800" height="600" viewBox="0 0 800 600"&gt;
+  &lt;rect id="demoRect" x="300" y="250" width="200" height="100" rx="10" fill="#5e35b1" stroke="#4527a0" stroke-width="2"&gt;
+    &lt;animate attributeName="x" from="300" to="500" dur="2s" repeatCount="indefinite" /&gt;
+  &lt;/rect&gt;
+  &lt;circle id="demoCircle" cx="400" cy="300" r="60" fill="#26c6da" stroke="#00838f" stroke-width="2"&gt;
+    &lt;animate attributeName="r" values="60;70;60" dur="1.5s" repeatCount="indefinite" /&gt;
+  &lt;/circle&gt;
+  &lt;text id="demoText" x="400" y="320" font-family="Arial" font-size="24" fill="white" text-anchor="middle"&gt;SVG Studio&lt;/text&gt;
+&lt;/svg&gt;</div>
+            <div class="modal-controls">
+                <button class="action-btn" id="copyCode"><i class="fas fa-copy"></i> Copy to Clipboard</button>
+                <button class="action-btn" id="downloadCode"><i class="fas fa-download"></i> Download File</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="notification">
+        <i class="fas fa-check-circle"></i> Welcome to SVG Animation Studio Pro!
+    </div>
+
+    <!-- Tutorial Overlay -->
+    <div class="tutorial-overlay">
+        <div class="tutorial-content">
+            <h2>Welcome to SVG Animation Studio Pro</h2>
+            <p>Create stunning SVG animations with our professional-grade animation studio. Get started with these powerful features:</p>
+            <p>🎨 Draw shapes, paths, and text<br>
+               ⚡️ Create smooth animations with keyframes<br>
+               🎬 Preview your animations in real-time<br>
+               💾 Export your creations as SVG, HTML or React components</p>
+            <button class="tutorial-btn">Get Started</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // UI Event Listeners
+            document.querySelectorAll('.tool-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    showNotification(`Tool selected: ${this.textContent.trim()} 🛠️`);
+                });
+            });
+            
+            document.getElementById('toggleGrid').addEventListener('click', function() {
+                const grid = document.getElementById('gridOverlay');
+                const isVisible = grid.getAttribute('opacity') === '0.3';
+                grid.setAttribute('opacity', isVisible ? '0' : '0.3');
+                showNotification(`Grid ${isVisible ? 'hidden' : 'shown'} 📐`);
+            });
+            
+            document.getElementById('clearCanvas').addEventListener('click', function() {
+                if (confirm('Are you sure you want to clear the canvas?')) {
+                    showNotification('Canvas cleared! 🧹');
+                }
+            });
+            
+            document.getElementById('addKeyframe').addEventListener('click', function() {
+                showNotification('Keyframe added! 🎬');
+            });
+            
+            // Timeline controls
+            document.getElementById('playBtn').addEventListener('click', function() {
+                showNotification('Animation playing! ▶️');
+            });
+            
+            document.getElementById('pauseBtn').addEventListener('click', function() {
+                showNotification('Animation paused! ⏸️');
+            });
+            
+            document.getElementById('stopBtn').addEventListener('click', function() {
+                showNotification('Animation stopped! ⏹️');
+            });
+            
+            document.getElementById('recordBtn').addEventListener('click', function() {
+                this.classList.toggle('recording');
+                const isRecording = this.classList.contains('recording');
+                this.innerHTML = isRecording ? '<i class="fas fa-circle"></i> Recording' : '<i class="fas fa-circle"></i> Record';
+                showNotification(isRecording ? 'Recording started! 🔴' : 'Recording stopped! ⏹️');
+            });
+            
+            // Modal controls
+            document.getElementById('exportBtn').addEventListener('click', function() {
+                document.getElementById('exportModal').style.display = 'block';
+            });
+            
+            document.querySelector('.close-btn').addEventListener('click', function() {
+                document.getElementById('exportModal').style.display = 'none';
+            });
+            
+            document.getElementById('copyCode').addEventListener('click', function() {
+                showNotification('Code copied to clipboard! 📋');
+            });
+            
+            document.getElementById('downloadCode').addEventListener('click', function() {
+                showNotification('File downloaded! 💾');
+            });
+            
+            // Tutorial
+            document.querySelector('.tutorial-btn').addEventListener('click', function() {
+                document.querySelector('.tutorial-overlay').style.display = 'none';
+                showNotification('Welcome to SVG Animation Studio Pro! 🎉');
+            });
+            
+            // Demo animations
+            setInterval(() => {
+                const rect = document.getElementById('demoRect');
+                const circle = document.getElementById('demoCircle');
+                const text = document.getElementById('demoText');
+                
+                // Animate rectangle position
+                const rectX = parseInt(rect.getAttribute('x'));
+                rect.setAttribute('x', rectX === 300 ? 320 : 300);
+                
+                // Animate circle size
+                const circleR = parseInt(circle.getAttribute('r'));
+                circle.setAttribute('r', circleR === 60 ? 65 : 60);
+                
+                // Animate text color
+                text.setAttribute('fill', text.getAttribute('fill') === 'white' ? '#ffeb3b' : 'white');
+                
+                // Highlight elements
+                [rect, circle, text].forEach(el => {
+                    el.classList.remove('highlight');
+                    setTimeout(() => el.classList.add('highlight'), 100);
+                });
+                
+            }, 1500);
+            
+            // Handle scrubber
+            const scrubber = document.querySelector('.scrubber-handle');
+            const track = document.querySelector('.scrubber-track');
+            const timeline = document.querySelector('.timeline-scrubber');
+            let isScrubbing = false;
+            
+            timeline.addEventListener('mousedown', function(e) {
+                isScrubbing = true;
+                updateScrubberPosition(e);
+            });
+            
+            document.addEventListener('mousemove', function(e) {
+                if (isScrubbing) {
+                    updateScrubberPosition(e);
+                }
+            });
+            
+            document.addEventListener('mouseup', function() {
+                isScrubbing = false;
+            });
+            
+            function updateScrubberPosition(e) {
+                const rect = timeline.getBoundingClientRect();
+                let pos = (e.clientX - rect.left) / rect.width;
+                pos = Math.max(0, Math.min(1, pos));
+                
+                scrubber.style.left = `${pos * 100}%`;
+                track.style.width = `${pos * 100}%`;
+            }
+            
+            // Notification function
+            function showNotification(message) {
+                const notification = document.getElementById('notification');
+                notification.innerHTML = `<i class="fas fa-info-circle"></i> ${message}`;
+                notification.classList.add('show');
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+            
+            // Initialize with a notification
+            setTimeout(() => {
+                showNotification('Studio initialized successfully! 🚀');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
