@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVG Animation Studio Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo::before {
+            content: "⚡";
+            font-size: 1.8rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .main-container {
+            flex: 1;
+            display: flex;
+            height: calc(100vh - 80px);
+        }
+
+        .sidebar {
+            width: 300px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .panel {
+            margin-bottom: 2rem;
+        }
+
+        .panel-title {
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .shape-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.8rem;
+        }
+
+        .shape-btn {
+            aspect-ratio: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .shape-btn:hover, .shape-btn.active {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #667eea;
+            transform: scale(1.05);
+        }
+
+        .control-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .control-label {
+            display: block;
+            color: white;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .control-input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .control-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+        }
+
+        .control-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .slider-container {
+            position: relative;
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .canvas-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 2rem;
+        }
+
+        .canvas-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .canvas {
+            flex: 1;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .svg-workspace {
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+        }
+
+        .timeline {
+            height: 120px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px 12px 0 0;
+            margin-top: 1rem;
+            padding: 1rem;
+        }
+
+        .timeline-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .timeline-title {
+            color: white;
+            font-weight: 600;
+        }
+
+        .playback-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .play-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .play-btn:hover {
+            background: #5a67d8;
+            transform: scale(1.1);
+        }
+
+        .keyframe-track {
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            position: relative;
+            margin-top: 0.5rem;
+        }
+
+        .keyframe {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #667eea;
+            border: 2px solid white;
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .keyframe:hover {
+            transform: translateY(-50%) scale(1.3);
+        }
+
+        .properties-panel {
+            width: 280px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .element-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .element-item {
+            padding: 0.8rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .element-item:hover, .element-item.selected {
+            background: rgba(102, 126, 234, 0.3);
+            transform: translateX(4px);
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #ff6b6b;
+            font-size: 1.2rem;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+
+        .delete-btn:hover {
+            opacity: 1;
+        }
+
+        .animation-controls {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.8rem;
+        }
+
+        .anim-btn {
+            padding: 0.8rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+
+        .anim-btn:hover {
+            background: rgba(102, 126, 234, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .code-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .code-modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .code-content {
+            background: rgba(30, 30, 30, 0.95);
+            border-radius: 16px;
+            padding: 2rem;
+            width: 80%;
+            max-width: 800px;
+            max-height: 80%;
+            overflow: auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .code-title {
+            color: white;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #ff6b6b;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .code-output {
+            background: #1a1a1a;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 1.5rem;
+            color: #e2e8f0;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+
+        .copy-btn {
+            margin-top: 1rem;
+            width: 100%;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .recording {
+            animation: pulse 1s infinite;
+        }
+
+        .tooltip {
+            position: relative;
+        }
+
+        .tooltip:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            z-index: 1000;
+        }
+
+        .grid-bg {
+            fill: none;
+            stroke: #f0f0f0;
+            stroke-width: 0.5;
+            opacity: 0.3;
+        }
+
+        @media (max-width: 1200px) {
+            .sidebar {
+                width: 250px;
+            }
+            
+            .properties-panel {
+                width: 220px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+            
+            .sidebar, .properties-panel {
+                width: 100%;
+                height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">SVG Animation Studio Pro</div>
+        <div class="header-actions">
+            <button class="btn btn-secondary" onclick="newProject()">New Project</button>
+            <button class="btn btn-secondary" onclick="saveProject()">Save</button>
+            <button class="btn btn-primary" onclick="exportCode()">Export SVG</button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <aside class="sidebar">
+            <div class="panel">
+                <div class="panel-title">🎨 Shapes</div>
+                <div class="shape-grid">
+                    <button class="shape-btn tooltip" data-tooltip="Rectangle" onclick="selectTool('rect')">⬛</button>
+                    <button class="shape-btn tooltip" data-tooltip="Circle" onclick="selectTool('circle')">●</button>
+                    <button class="shape-btn tooltip" data-tooltip="Ellipse" onclick="selectTool('ellipse')">⬭</button>
+                    <button class="shape-btn tooltip" data-tooltip="Line" onclick="selectTool('line')">📏</button>
+                    <button class="shape-btn tooltip" data-tooltip="Polygon" onclick="selectTool('polygon')">⬢</button>
+                    <button class="shape-btn tooltip" data-tooltip="Path" onclick="selectTool('path')">✏️</button>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">🎛️ Transform</div>
+                
+                <div class="control-group">
+                    <label class="control-label">Position X</label>
+                    <div class="slider-container">
+                        <input type="range" class="slider" id="posX" min="0" max="800" value="100" oninput="updateTransform()">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">Position Y</label>
+                    <div class="slider-container">
+                        <input type="range" class="slider" id="posY" min="0" max="600" value="100" oninput="updateTransform()">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">Scale</label>
+                    <div class="slider-container">
+                        <input type="range" class="slider" id="scale" min="0.1" max="3" step="0.1" value="1" oninput="updateTransform()">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">Rotation</label>
+                    <div class="slider-container">
+                        <input type="range" class="slider" id="rotation" min="0" max="360" value="0" oninput="updateTransform()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">🎨 Appearance</div>
+                
+                <div class="control-group">
+                    <label class="control-label">Fill Color</label>
+                    <input type="color" class="control-input" id="fillColor" value="#667eea" onchange="updateAppearance()">
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">Stroke Color</label>
+                    <input type="color" class="control-input" id="strokeColor" value="#333333" onchange="updateAppearance()">
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">Stroke Width</label>
+                    <div class="slider-container">
+                        <input type="range" class="slider" id="strokeWidth" min="0" max="20" value="2" oninput="updateAppearance()">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">Opacity</label>
+                    <div class="slider-container">
+                        <input type="range" class="slider" id="opacity" min="0" max="1" step="0.1" value="1" oninput="updateAppearance()">
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="canvas-container">
+            <div class="canvas-header">
+                <h2 style="color: white; font-weight: 600;">Canvas</h2>
+            </div>
+            
+            <div class="canvas">
+                <svg class="svg-workspace" id="svgCanvas" width="100%" height="100%" viewBox="0 0 800 600">
+                    <defs>
+                        <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                            <rect width="20" height="20" fill="none" stroke="#f0f0f0" stroke-width="0.5" opacity="0.3"/>
+                        </pattern>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#grid)" />
+                </svg>
+            </div>
+
+            <div class="timeline">
+                <div class="timeline-header">
+                    <div class="timeline-title">Animation Timeline</div>
+                    <div class="playback-controls">
+                        <button class="play-btn" id="playBtn" onclick="togglePlayback()">▶</button>
+                        <button class="play-btn" onclick="stopAnimation()">⏹</button>
+                        <button class="play-btn" onclick="addKeyframe()">⚫</button>
+                    </div>
+                </div>
+                <div class="keyframe-track" id="timelineTrack">
+                    <div class="keyframe" style="left: 10px;" onclick="selectKeyframe(this)"></div>
+                    <div class="keyframe" style="left: 50px;" onclick="selectKeyframe(this)"></div>
+                </div>
+            </div>
+        </main>
+
+        <aside class="properties-panel">
+            <div class="panel">
+                <div class="panel-title">📋 Elements</div>
+                <div class="element-list" id="elementList">
+                    <!-- Elements will be populated here -->
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">⚡ Animations</div>
+                <div class="animation-controls">
+                    <button class="anim-btn" onclick="addAnimation('fadeIn')">Fade In</button>
+                    <button class="anim-btn" onclick="addAnimation('fadeOut')">Fade Out</button>
+                    <button class="anim-btn" onclick="addAnimation('slideIn')">Slide In</button>
+                    <button class="anim-btn" onclick="addAnimation('slideOut')">Slide Out</button>
+                    <button class="anim-btn" onclick="addAnimation('rotate')">Rotate</button>
+                    <button class="anim-btn" onclick="addAnimation('scale')">Scale</button>
+                    <button class="anim-btn" onclick="addAnimation('bounce')">Bounce</button>
+                    <button class="anim-btn" onclick="addAnimation('pulse')">Pulse</button>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">⏱️ Timing</div>
+                
+                <div class="control-group">
+                    <label class="control-label">Duration (seconds)</label>
+                    <input type="number" class="control-input" id="animDuration" value="2" min="0.1" step="0.1" onchange="updateAnimationTiming()">
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">Delay (seconds)</label>
+                    <input type="number" class="control-input" id="animDelay" value="0" min="0" step="0.1" onchange="updateAnimationTiming()">
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">Easing</label>
+                    <select class="control-input" id="animEasing" onchange="updateAnimationTiming()">
+                        <option value="ease">Ease</option>
+                        <option value="ease-in">Ease In</option>
+                        <option value="ease-out">Ease Out</option>
+                        <option value="ease-in-out">Ease In-Out</option>
+                        <option value="linear">Linear</option>
+                        <option value="cubic-bezier(0.68, -0.55, 0.265, 1.55)">Bounce</option>
+                    </select>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <div class="code-modal" id="codeModal">
+        <div class="code-content">
+            <div class="code-header">
+                <h3 class="code-title">Exported SVG Animation</h3>
+                <button class="close-btn" onclick="closeCodeModal()">✕</button>
+            </div>
+            <pre class="code-output" id="codeOutput"></pre>
+            <button class="btn btn-primary copy-btn" onclick="copyCode()">Copy to Clipboard</button>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let currentTool = null;
+        let selectedElement = null;
+        let elements = [];
+        let elementCounter = 0;
+        let isPlaying = false;
+        let animationStartTime = 0;
+        let keyframes = [];
+
+        // Initialize the application
+        function init() {
+            setupEventListeners();
+            updateElementList();
+        }
+
+        function setupEventListeners() {
+            const svgCanvas = document.getElementById('svgCanvas');
+            svgCanvas.addEventListener('click', handleCanvasClick);
+            svgCanvas.addEventListener('mousemove', handleCanvasMouseMove);
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', handleKeyDown);
+        }
+
+        function selectTool(tool) {
+            // Remove active class from all buttons
+            document.querySelectorAll('.shape-btn').forEach(btn => btn.classList.remove('active'));
+            
+            // Add active class to selected button
+            event.target.classList.add('active');
+            
+            currentTool = tool;
+            document.getElementById('svgCanvas').style.cursor = tool ? 'crosshair' : 'default';
+        }
+
+        function handleCanvasClick(e) {
+            if (!currentTool) return;
+
+            const svgRect = e.currentTarget.getBoundingClientRect();
+            const x = ((e.clientX - svgRect.left) / svgRect.width) * 800;
+            const y = ((e.clientY - svgRect.top) / svgRect.height) * 600;
+
+            createElement(currentTool, x, y);
+        }
+
+        function handleCanvasMouseMove(e) {
+            // Could be used for preview while drawing
+        }
+
+        function handleKeyDown(e) {
+            if (e.key === 'Delete' && selectedElement) {
+                deleteElement(selectedElement.id);
+            } else if (e.key === 'Escape') {
+                deselectAll();
+            } else if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                saveProject();
+            }
+        }
+
+        function createElement(type, x, y) {
+            const element = {
+                id: `element_${++elementCounter}`,
+                type: type,
+                x: x,
+                y: y,
+                width: type === 'line' ? 100 : 80,
+                height: type === 'line' ? 0 : 80,
+                fill: document.getElementById('fillColor').value,
+                stroke: document.getElementById('strokeColor').value,
+                strokeWidth: document.getElementById('strokeWidth').value,
+                opacity: document.getElementById('opacity').value,
+                rotation: 0,
+                scale: 1,
+                animations: []
+            };
+
+            elements.push(element);
+            renderElement(element);
+            selectElement(element.id);
+            updateElementList();
+        }
+
+        function renderElement(element) {
+            const svgCanvas = document.getElementById('svgCanvas');
+            let svgElement;
+
+            switch (element.type) {
+                case 'rect':
+                    svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    svgElement.setAttribute('x', element.x);
+                    svgElement.setAttribute('y', element.y);
+                    svgElement.setAttribute('width', element.width);
+                    svgElement.setAttribute('height', element.height);
+                    break;
+                case 'circle':
+                    svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    svgElement.setAttribute('cx', element.x + element.width/2);
+                    svgElement.setAttribute('cy', element.y + element.height/2);
+                    svgElement.setAttribute('r', element.width/2);
+                    break;
+                case 'ellipse':
+                    svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+                    svgElement.setAttribute('cx', element.x + element.width/2);
+                    svgElement.setAttribute('cy', element.y + element.height/2);
+                    svgElement.setAttribute('rx', element.width/2);
+                    svgElement.setAttribute('ry', element.height/2);
+                    break;
+                case 'line':
+                    svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    svgElement.setAttribute('x1', element.x);
+                    svgElement.setAttribute('y1', element.y);
+                    svgElement.setAttribute('x2', element.x + element.width);
+                    svgElement.setAttribute('y2', element.y);
+                    break;
+                case 'polygon':
+                    svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                    const centerX = element.x + element.width/2;
+                    const centerY = element.y + element.height/2;
+                    const radius = element.width/2;
+                    let points = '';
+                    for (let i = 0; i < 6; i++) {
+                        const angle = (i * 60) * Math.PI / 180;
+                        const x = centerX + radius * Math.cos(angle);
+                        const y = centerY + radius * Math.sin(angle);
+                        points += `${x},${y} `;
+                    }
+                    svgElement.setAttribute('points', points.trim());
+                    break;
+                case 'path':
+                    svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    svgElement.setAttribute('d', `M ${element.x} ${element.y} Q ${element.x + element.width/2} ${element.y - 20} ${element.x + element.width} ${element.y}`);
+                    break;
+            }
+
+            if (svgElement) {
+                svgElement.setAttribute('id', element.id);
+                svgElement.setAttribute('fill', element.fill);
+                svgElement.setAttribute('stroke', element.stroke);
+                svgElement.setAttribute('stroke-width', element.strokeWidth);
+                svgElement.setAttribute('opacity', element.opacity);
+                svgElement.style.cursor = 'pointer';
+                
+                // Add click handler
+                svgElement.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    selectElement(element.id);
+                });
+
+                svgCanvas.appendChild(svgElement);
+            }
+        }
+
+        function selectElement(elementId) {
+            // Remove selection from all elements
+            document.querySelectorAll('.element-item').forEach(item => item.classList.remove('selected'));
+            document.querySelectorAll('#svgCanvas > *').forEach(el => el.style.filter = '');
+
+            selectedElement = elements.find(el => el.id === elementId);
+            
+            if (selectedElement) {
+                // Highlight in element list
+                const elementItem = document.querySelector(`[data-element-id="${elementId}"]`);
+                if (elementItem) elementItem.classList.add('selected');
+
+                // Highlight in SVG
+                const svgElement = document.getElementById(elementId);
+                if (svgElement) svgElement.style.filter = 'drop-shadow(0 0 8px #667eea)';
+
+                // Update controls
+                updateControlsFromElement();
+            }
+        }
+
+        function updateControlsFromElement() {
+            if (!selectedElement) return;
+
+            document.getElementById('posX').value = selectedElement.x;
+            document.getElementById('posY').value = selectedElement.y;
+            document.getElementById('scale').value = selectedElement.scale;
+            document.getElementById('rotation').value = selectedElement.rotation;
+            document.getElementById('fillColor').value = selectedElement.fill;
+            document.getElementById('strokeColor').value = selectedElement.stroke;
+            document.getElementById('strokeWidth').value = selectedElement.strokeWidth;
+            document.getElementById('opacity').value = selectedElement.opacity;
+        }
+
+        function updateTransform() {
+            if (!selectedElement) return;
+
+            const posX = parseFloat(document.getElementById('posX').value);
+            const posY = parseFloat(document.getElementById('posY').value);
+            const scale = parseFloat(document.getElementById('scale').value);
+            const rotation = parseFloat(document.getElementById('rotation').value);
+
+            selectedElement.x = posX;
+            selectedElement.y = posY;
+            selectedElement.scale = scale;
+            selectedElement.rotation = rotation;
+
+            updateElementInSVG();
+        }
+
+        function updateAppearance() {
+            if (!selectedElement) return;
+
+            selectedElement.fill = document.getElementById('fillColor').value;
+            selectedElement.stroke = document.getElementById('strokeColor').value;
+            selectedElement.strokeWidth = document.getElementById('strokeWidth').value;
+            selectedElement.opacity = document.getElementById('opacity').value;
+
+            updateElementInSVG();
+        }
+
+        function updateElementInSVG() {
+            if (!selectedElement) return;
+
+            const svgElement = document.getElementById(selectedElement.id);
+            if (!svgElement) return;
+
+            // Update basic attributes
+            svgElement.setAttribute('fill', selectedElement.fill);
+            svgElement.setAttribute('stroke', selectedElement.stroke);
+            svgElement.setAttribute('stroke-width', selectedElement.strokeWidth);
+            svgElement.setAttribute('opacity', selectedElement.opacity);
+
+            // Update transform
+            let transform = `translate(${selectedElement.x}, ${selectedElement.y})`;
+            if (selectedElement.scale !== 1) {
+                transform += ` scale(${selectedElement.scale})`;
+            }
+            if (selectedElement.rotation !== 0) {
+                const centerX = selectedElement.width / 2;
+                const centerY = selectedElement.height / 2;
+                transform += ` rotate(${selectedElement.rotation}, ${centerX}, ${centerY})`;
+            }
+
+            if (transform !== `translate(${selectedElement.x}, ${selectedElement.y})`) {
+                svgElement.setAttribute('transform', transform);
+            } else {
+                svgElement.removeAttribute('transform');
+            }
+
+            // Update position-specific attributes
+            switch (selectedElement.type) {
+                case 'rect':
+                    svgElement.setAttribute('x', 0);
+                    svgElement.setAttribute('y', 0);
+                    break;
+                case 'circle':
+                    svgElement.setAttribute('cx', selectedElement.width/2);
+                    svgElement.setAttribute('cy', selectedElement.height/2);
+                    break;
+                case 'ellipse':
+                    svgElement.setAttribute('cx', selectedElement.width/2);
+                    svgElement.setAttribute('cy', selectedElement.height/2);
+                    break;
+            }
+        }
+
+        function deleteElement(elementId) {
+            const elementIndex = elements.findIndex(el => el.id === elementId);
+            if (elementIndex > -1) {
+                elements.splice(elementIndex, 1);
+                
+                const svgElement = document.getElementById(elementId);
+                if (svgElement) svgElement.remove();
+                
+                if (selectedElement && selectedElement.id === elementId) {
+                    selectedElement = null;
+                }
+                
+                updateElementList();
+            }
+        }
+
+        function updateElementList() {
+            const elementList = document.getElementById('elementList');
+            elementList.innerHTML = '';
+
+            elements.forEach(element => {
+                const elementItem = document.createElement('div');
+                elementItem.className = 'element-item';
+                elementItem.setAttribute('data-element-id', element.id);
+                elementItem.onclick = () => selectElement(element.id);
+
+                const elementInfo = document.createElement('span');
+                elementInfo.textContent = `${element.type.charAt(0).toUpperCase() + element.type.slice(1)} ${element.id.split('_')[1]}`;
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.innerHTML = '🗑️';
+                deleteBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    deleteElement(element.id);
+                };
+
+                elementItem.appendChild(elementInfo);
+                elementItem.appendChild(deleteBtn);
+                elementList.appendChild(elementItem);
+            });
+        }
+
+        function addAnimation(type) {
+            if (!selectedElement) {
+                alert('Please select an element first');
+                return;
+            }
+
+            const duration = parseFloat(document.getElementById('animDuration').value);
+            const delay = parseFloat(document.getElementById('animDelay').value);
+            const easing = document.getElementById('animEasing').value;
+
+            const animation = {
+                type: type,
+                duration: duration,
+                delay: delay,
+                easing: easing,
+                id: `anim_${Date.now()}`
+            };
+
+            selectedElement.animations.push(animation);
+            applyAnimation(selectedElement, animation);
+        }
+
+        function applyAnimation(element, animation) {
+            const svgElement = document.getElementById(element.id);
+            if (!svgElement) return;
+
+            const animElement = document.createElementNS('http://www.w3.org/2000/svg', 'animateTransform');
+            animElement.setAttribute('attributeName', 'transform');
+            animElement.setAttribute('type', getAnimationType(animation.type));
+            animElement.setAttribute('dur', `${animation.duration}s`);
+            animElement.setAttribute('begin', `${animation.delay}s`);
+            animElement.setAttribute('repeatCount', 'indefinite');
+
+            switch (animation.type) {
+                case 'rotate':
+                    animElement.setAttribute('values', `0 ${element.width/2} ${element.height/2}; 360 ${element.width/2} ${element.height/2}`);
+                    break;
+                case 'scale':
+                    animElement.setAttribute('values', '1; 1.5; 1');
+                    break;
+                case 'bounce':
+                    animElement.setAttribute('attributeName', 'transform');
+                    animElement.setAttribute('type', 'translate');
+                    animElement.setAttribute('values', `0,0; 0,-20; 0,0`);
+                    break;
+                case 'pulse':
+                    const pulseAnim = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+                    pulseAnim.setAttribute('attributeName', 'opacity');
+                    pulseAnim.setAttribute('values', '1; 0.5; 1');
+                    pulseAnim.setAttribute('dur', `${animation.duration}s`);
+                    pulseAnim.setAttribute('begin', `${animation.delay}s`);
+                    pulseAnim.setAttribute('repeatCount', 'indefinite');
+                    svgElement.appendChild(pulseAnim);
+                    return;
+                case 'fadeIn':
+                    const fadeIn = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+                    fadeIn.setAttribute('attributeName', 'opacity');
+                    fadeIn.setAttribute('values', '0; 1');
+                    fadeIn.setAttribute('dur', `${animation.duration}s`);
+                    fadeIn.setAttribute('begin', `${animation.delay}s`);
+                    fadeIn.setAttribute('fill', 'freeze');
+                    svgElement.appendChild(fadeIn);
+                    return;
+                case 'fadeOut':
+                    const fadeOut = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+                    fadeOut.setAttribute('attributeName', 'opacity');
+                    fadeOut.setAttribute('values', '1; 0');
+                    fadeOut.setAttribute('dur', `${animation.duration}s`);
+                    fadeOut.setAttribute('begin', `${animation.delay}s`);
+                    fadeOut.setAttribute('fill', 'freeze');
+                    svgElement.appendChild(fadeOut);
+                    return;
+                case 'slideIn':
+                    animElement.setAttribute('type', 'translate');
+                    animElement.setAttribute('values', `-${element.width},0; 0,0`);
+                    animElement.setAttribute('fill', 'freeze');
+                    break;
+                case 'slideOut':
+                    animElement.setAttribute('type', 'translate');
+                    animElement.setAttribute('values', `0,0; ${element.width},0`);
+                    animElement.setAttribute('fill', 'freeze');
+                    break;
+            }
+
+            svgElement.appendChild(animElement);
+        }
+
+        function getAnimationType(animType) {
+            switch (animType) {
+                case 'rotate': return 'rotate';
+                case 'scale': return 'scale';
+                case 'slideIn':
+                case 'slideOut':
+                case 'bounce': return 'translate';
+                default: return 'translate';
+            }
+        }
+
+        function togglePlayback() {
+            const playBtn = document.getElementById('playBtn');
+            
+            if (isPlaying) {
+                // Stop playback
+                isPlaying = false;
+                playBtn.innerHTML = '▶';
+                playBtn.classList.remove('recording');
+                
+                // Remove all animations
+                document.querySelectorAll('#svgCanvas animateTransform, #svgCanvas animate').forEach(anim => {
+                    anim.remove();
+                });
+            } else {
+                // Start playback
+                isPlaying = true;
+                playBtn.innerHTML = '⏸';
+                playBtn.classList.add('recording');
+                animationStartTime = Date.now();
+                
+                // Apply all animations
+                elements.forEach(element => {
+                    element.animations.forEach(animation => {
+                        applyAnimation(element, animation);
+                    });
+                });
+            }
+        }
+
+        function stopAnimation() {
+            isPlaying = false;
+            const playBtn = document.getElementById('playBtn');
+            playBtn.innerHTML = '▶';
+            playBtn.classList.remove('recording');
+            
+            // Remove all animations and reset elements
+            document.querySelectorAll('#svgCanvas animateTransform, #svgCanvas animate').forEach(anim => {
+                anim.remove();
+            });
+            
+            // Reset all elements to their base state
+            elements.forEach(element => {
+                updateElementInSVG();
+            });
+        }
+
+        function addKeyframe() {
+            if (!selectedElement) {
+                alert('Please select an element to add a keyframe');
+                return;
+            }
+
+            const timelineTrack = document.getElementById('timelineTrack');
+            const keyframe = document.createElement('div');
+            keyframe.className = 'keyframe';
+            keyframe.style.left = `${keyframes.length * 50 + 10}px`;
+            keyframe.onclick = () => selectKeyframe(keyframe);
+            
+            const keyframeData = {
+                element: selectedElement.id,
+                time: keyframes.length * 0.5,
+                properties: { ...selectedElement }
+            };
+            
+            keyframes.push(keyframeData);
+            timelineTrack.appendChild(keyframe);
+        }
+
+        function selectKeyframe(keyframeElement) {
+            document.querySelectorAll('.keyframe').forEach(kf => kf.style.background = '#667eea');
+            keyframeElement.style.background = '#ff6b6b';
+        }
+
+        function exportCode() {
+            const svgCanvas = document.getElementById('svgCanvas');
+            const svgClone = svgCanvas.cloneNode(true);
+            
+            // Remove grid background
+            const gridRect = svgClone.querySelector('rect[fill="url(#grid)"]');
+            if (gridRect) gridRect.remove();
+            
+            // Clean up and format the SVG
+            svgClone.removeAttribute('style');
+            svgClone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+            
+            const svgString = new XMLSerializer().serializeToString(svgClone);
+            const formattedSVG = formatSVG(svgString);
+            
+            document.getElementById('codeOutput').textContent = formattedSVG;
+            document.getElementById('codeModal').classList.add('active');
+        }
+
+        function formatSVG(svgString) {
+            // Basic SVG formatting
+            return svgString
+                .replace(/></g, '>\n<')
+                .replace(/\n\s*\n/g, '\n')
+                .split('\n')
+                .map((line, index) => {
+                    const depth = (line.match(/</g) || []).length - (line.match(/\//g) || []).length;
+                    const indent = '  '.repeat(Math.max(0, depth - 1));
+                    return indent + line.trim();
+                })
+                .join('\n');
+        }
+
+        function closeCodeModal() {
+            document.getElementById('codeModal').classList.remove('active');
+        }
+
+        function copyCode() {
+            const codeOutput = document.getElementById('codeOutput');
+            
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(codeOutput.textContent).then(() => {
+                    const copyBtn = document.querySelector('.copy-btn');
+                    const originalText = copyBtn.textContent;
+                    copyBtn.textContent = 'Copied! ✅';
+                    copyBtn.style.background = '#10b981';
+                    
+                    setTimeout(() => {
+                        copyBtn.textContent = originalText;
+                        copyBtn.style.background = '';
+                    }, 2000);
+                });
+            } else {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = codeOutput.textContent;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                alert('Code copied to clipboard!');
+            }
+        }
+
+        function newProject() {
+            if (elements.length > 0 && !confirm('This will clear your current project. Continue?')) {
+                return;
+            }
+            
+            elements = [];
+            selectedElement = null;
+            keyframes = [];
+            elementCounter = 0;
+            
+            // Clear SVG
+            const svgCanvas = document.getElementById('svgCanvas');
+            const children = Array.from(svgCanvas.children);
+            children.forEach(child => {
+                if (!child.matches('defs, rect[fill="url(#grid)"]')) {
+                    child.remove();
+                }
+            });
+            
+            // Clear timeline
+            const timelineTrack = document.getElementById('timelineTrack');
+            timelineTrack.innerHTML = '';
+            
+            updateElementList();
+            stopAnimation();
+        }
+
+        function saveProject() {
+            const projectData = {
+                elements: elements,
+                keyframes: keyframes,
+                version: '1.0',
+                timestamp: Date.now()
+            };
+            
+            const dataStr = JSON.stringify(projectData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'svg-animation-project.json';
+            link.click();
+            
+            URL.revokeObjectURL(url);
+        }
+
+        function loadProject(projectData) {
+            try {
+                const data = JSON.parse(projectData);
+                newProject(); // Clear current project
+                
+                elements = data.elements || [];
+                keyframes = data.keyframes || [];
+                elementCounter = elements.length;
+                
+                // Recreate elements in SVG
+                elements.forEach(element => {
+                    renderElement(element);
+                });
+                
+                updateElementList();
+                
+                // Recreate keyframes in timeline
+                const timelineTrack = document.getElementById('timelineTrack');
+                keyframes.forEach((kf, index) => {
+                    const keyframe = document.createElement('div');
+                    keyframe.className = 'keyframe';
+                    keyframe.style.left = `${index * 50 + 10}px`;
+                    keyframe.onclick = () => selectKeyframe(keyframe);
+                    timelineTrack.appendChild(keyframe);
+                });
+                
+            } catch (error) {
+                alert('Error loading project: ' + error.message);
+            }
+        }
+
+        function updateAnimationTiming() {
+            if (!selectedElement) return;
+            
+            // Update timing for existing animations would require more complex state management
+            // For now, this updates the default values for new animations
+        }
+
+        function deselectAll() {
+            selectedElement = null;
+            document.querySelectorAll('.element-item').forEach(item => item.classList.remove('selected'));
+            document.querySelectorAll('#svgCanvas > *').forEach(el => el.style.filter = '');
+        }
+
+        // Drag and drop functionality for keyframes
+        function enableKeyframeDragging() {
+            let draggedKeyframe = null;
+            
+            document.addEventListener('mousedown', (e) => {
+                if (e.target.classList.contains('keyframe')) {
+                    draggedKeyframe = e.target;
+                    e.target.style.cursor = 'grabbing';
+                }
+            });
+            
+            document.addEventListener('mousemove', (e) => {
+                if (draggedKeyframe) {
+                    const timelineTrack = document.getElementById('timelineTrack');
+                    const trackRect = timelineTrack.getBoundingClientRect();
+                    const newLeft = Math.max(0, Math.min(trackRect.width - 12, e.clientX - trackRect.left - 6));
+                    draggedKeyframe.style.left = newLeft + 'px';
+                }
+            });
+            
+            document.addEventListener('mouseup', () => {
+                if (draggedKeyframe) {
+                    draggedKeyframe.style.cursor = 'pointer';
+                    draggedKeyframe = null;
+                }
+            });
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', () => {
+            init();
+            enableKeyframeDragging();
+            
+            // Add file input for loading projects
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = '.json';
+            fileInput.style.display = 'none';
+            fileInput.onchange = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => loadProject(e.target.result);
+                    reader.readAsText(file);
+                }
+            };
+            document.body.appendChild(fileInput);
+            
+            // Add load button functionality
+            const loadBtn = document.createElement('button');
+            loadBtn.className = 'btn btn-secondary';
+            loadBtn.textContent = 'Load';
+            loadBtn.onclick = () => fileInput.click();
+            document.querySelector('.header-actions').insertBefore(loadBtn, document.querySelector('.header-actions').children[1]);
+        });
+    </script>
+</body>
+</html>
