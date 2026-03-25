@@ -1,0 +1,1444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVG Animation Studio Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e1e2e 0%, #2d2d44 100%);
+            color: #ffffff;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .studio-container {
+            display: grid;
+            grid-template-columns: 280px 1fr 320px;
+            grid-template-rows: 60px 1fr 180px;
+            height: 100vh;
+            gap: 1px;
+            background: #0f0f1a;
+        }
+
+        /* Header */
+        .header {
+            grid-column: 1 / -1;
+            background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo::before {
+            content: "⚡";
+            font-size: 28px;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+            transform: translateY(-1px);
+        }
+
+        /* Left Panel - Tools */
+        .tools-panel {
+            background: #1a1a2e;
+            border-right: 1px solid #2a2a4a;
+            overflow-y: auto;
+        }
+
+        .panel-header {
+            padding: 15px 20px;
+            background: #16213e;
+            font-weight: bold;
+            border-bottom: 1px solid #2a2a4a;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+
+        .tool-section {
+            padding: 20px;
+            border-bottom: 1px solid #2a2a4a;
+        }
+
+        .tool-group {
+            margin-bottom: 20px;
+        }
+
+        .tool-group h3 {
+            font-size: 14px;
+            margin-bottom: 10px;
+            color: #a5a5d6;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tool-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .tool-btn {
+            background: #2a2a4a;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            color: #ffffff;
+            font-size: 12px;
+        }
+
+        .tool-btn:hover, .tool-btn.active {
+            border-color: #6366f1;
+            background: #3a3a6a;
+            transform: translateY(-1px);
+        }
+
+        .color-input {
+            width: 100%;
+            height: 40px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        .slider {
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .slider input {
+            width: 100%;
+            -webkit-appearance: none;
+            height: 6px;
+            border-radius: 3px;
+            background: #2a2a4a;
+            outline: none;
+        }
+
+        .slider input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #6366f1;
+            cursor: pointer;
+        }
+
+        .slider label {
+            display: block;
+            font-size: 12px;
+            color: #a5a5d6;
+            margin-bottom: 5px;
+        }
+
+        /* Canvas Area */
+        .canvas-area {
+            background: #1e1e2e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .canvas-container {
+            width: 600px;
+            height: 400px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        #svg-canvas {
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+        }
+
+        .canvas-overlay {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.7);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            color: white;
+        }
+
+        /* Right Panel - Properties */
+        .properties-panel {
+            background: #1a1a2e;
+            border-left: 1px solid #2a2a4a;
+            overflow-y: auto;
+        }
+
+        .element-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        .element-item {
+            padding: 10px 15px;
+            border-bottom: 1px solid #2a2a4a;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .element-item:hover {
+            background: #2a2a4a;
+        }
+
+        .element-item.selected {
+            background: #3a3a6a;
+            border-left: 3px solid #6366f1;
+        }
+
+        .element-type {
+            font-size: 11px;
+            color: #a5a5d6;
+            text-transform: uppercase;
+        }
+
+        .property-group {
+            margin-bottom: 20px;
+            padding: 0 20px;
+        }
+
+        .property-group h4 {
+            font-size: 13px;
+            margin-bottom: 10px;
+            color: #a5a5d6;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .property-input {
+            width: 100%;
+            padding: 8px 12px;
+            background: #2a2a4a;
+            border: 1px solid #3a3a6a;
+            border-radius: 4px;
+            color: white;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .property-input:focus {
+            outline: none;
+            border-color: #6366f1;
+        }
+
+        /* Timeline */
+        .timeline-panel {
+            grid-column: 1 / -1;
+            background: #1a1a2e;
+            border-top: 1px solid #2a2a4a;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .timeline-controls {
+            padding: 15px 20px;
+            background: #16213e;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-bottom: 1px solid #2a2a4a;
+        }
+
+        .play-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #10b981;
+            border: none;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .play-btn:hover {
+            background: #059669;
+            transform: scale(1.1);
+        }
+
+        .timeline-scrubber {
+            flex: 1;
+            height: 6px;
+            background: #2a2a4a;
+            border-radius: 3px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .timeline-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #6366f1, #8b5cf6);
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.1s;
+        }
+
+        .timeline-handle {
+            position: absolute;
+            top: -6px;
+            width: 18px;
+            height: 18px;
+            background: #ffffff;
+            border-radius: 50%;
+            cursor: grab;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+
+        .timeline-handle:active {
+            cursor: grabbing;
+        }
+
+        .keyframes-area {
+            flex: 1;
+            padding: 20px;
+            overflow-x: auto;
+        }
+
+        .keyframe-track {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #2a2a4a;
+            border-radius: 6px;
+            position: relative;
+        }
+
+        .track-header {
+            font-size: 12px;
+            color: #a5a5d6;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .keyframe-marker {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #f59e0b;
+            border-radius: 50%;
+            cursor: pointer;
+            top: 25px;
+            transform: translateX(-6px);
+            transition: all 0.2s;
+        }
+
+        .keyframe-marker:hover {
+            background: #d97706;
+            transform: translateX(-6px) scale(1.2);
+        }
+
+        /* Export Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1a1a2e;
+            border-radius: 12px;
+            padding: 30px;
+            width: 600px;
+            max-width: 90vw;
+            max-height: 80vh;
+            overflow: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #a5a5d6;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .code-output {
+            background: #0f0f1a;
+            padding: 20px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #e5e7eb;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow: auto;
+            border: 1px solid #2a2a4a;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .recording {
+            animation: pulse 1s infinite;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .studio-container {
+                grid-template-columns: 250px 1fr 280px;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .studio-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: 60px 1fr 200px;
+            }
+            
+            .tools-panel,
+            .properties-panel {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="studio-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">SVG Animation Studio Pro</div>
+            <div class="header-controls">
+                <button class="btn btn-primary" onclick="clearCanvas()">Clear</button>
+                <button class="btn btn-primary" onclick="toggleGrid()">Grid</button>
+                <button class="btn btn-success" onclick="exportAnimation()">Export</button>
+            </div>
+        </header>
+
+        <!-- Tools Panel -->
+        <aside class="tools-panel">
+            <div class="panel-header">Tools & Shapes</div>
+            
+            <div class="tool-section">
+                <div class="tool-group">
+                    <h3>Drawing Tools</h3>
+                    <div class="tool-grid">
+                        <div class="tool-btn active" data-tool="rectangle">
+                            <div>⬜</div>
+                            Rectangle
+                        </div>
+                        <div class="tool-btn" data-tool="circle">
+                            <div>⭕</div>
+                            Circle
+                        </div>
+                        <div class="tool-btn" data-tool="line">
+                            <div>📏</div>
+                            Line
+                        </div>
+                        <div class="tool-btn" data-tool="path">
+                            <div>🖋️</div>
+                            Path
+                        </div>
+                        <div class="tool-btn" data-tool="text">
+                            <div>T</div>
+                            Text
+                        </div>
+                        <div class="tool-btn" data-tool="polygon">
+                            <div>🔷</div>
+                            Polygon
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tool-group">
+                    <h3>Fill Color</h3>
+                    <input type="color" class="color-input" id="fill-color" value="#6366f1">
+                </div>
+
+                <div class="tool-group">
+                    <h3>Stroke</h3>
+                    <input type="color" class="color-input" id="stroke-color" value="#1f2937">
+                    <div class="slider">
+                        <label>Stroke Width</label>
+                        <input type="range" id="stroke-width" min="0" max="20" value="2">
+                    </div>
+                </div>
+
+                <div class="tool-group">
+                    <h3>Opacity</h3>
+                    <div class="slider">
+                        <input type="range" id="opacity" min="0" max="1" step="0.1" value="1">
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Canvas Area -->
+        <main class="canvas-area">
+            <div class="canvas-container">
+                <svg id="svg-canvas" viewBox="0 0 600 400">
+                    <defs>
+                        <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#e5e7eb" stroke-width="0.5" opacity="0.3"/>
+                        </pattern>
+                    </defs>
+                    <rect id="grid-bg" width="100%" height="100%" fill="url(#grid)" style="display: none;"/>
+                </svg>
+                <div class="canvas-overlay">
+                    <div>Canvas: 600×400</div>
+                    <div id="mouse-pos">Mouse: 0, 0</div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Properties Panel -->
+        <aside class="properties-panel">
+            <div class="panel-header">Properties & Layers</div>
+            
+            <div class="tool-section">
+                <div class="tool-group">
+                    <h3>Elements</h3>
+                    <div class="element-list" id="element-list">
+                        <!-- Dynamic elements will be added here -->
+                    </div>
+                </div>
+
+                <div class="property-group">
+                    <h4>Transform</h4>
+                    <input type="number" class="property-input" id="prop-x" placeholder="X Position">
+                    <input type="number" class="property-input" id="prop-y" placeholder="Y Position">
+                    <input type="number" class="property-input" id="prop-width" placeholder="Width">
+                    <input type="number" class="property-input" id="prop-height" placeholder="Height">
+                    <div class="slider">
+                        <label>Rotation (degrees)</label>
+                        <input type="range" id="prop-rotation" min="0" max="360" value="0">
+                    </div>
+                    <div class="slider">
+                        <label>Scale</label>
+                        <input type="range" id="prop-scale" min="0.1" max="3" step="0.1" value="1">
+                    </div>
+                </div>
+
+                <div class="property-group">
+                    <h4>Animation</h4>
+                    <button class="btn btn-primary" onclick="addKeyframe()">Add Keyframe</button>
+                    <button class="btn btn-primary" onclick="addMotionPath()">Motion Path</button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Timeline -->
+        <section class="timeline-panel">
+            <div class="timeline-controls">
+                <button class="play-btn" id="play-btn" onclick="togglePlayback()">▶️</button>
+                <div class="timeline-scrubber" id="timeline-scrubber">
+                    <div class="timeline-progress" id="timeline-progress"></div>
+                    <div class="timeline-handle" id="timeline-handle"></div>
+                </div>
+                <span id="time-display">0.0s / 3.0s</span>
+            </div>
+            
+            <div class="keyframes-area" id="keyframes-area">
+                <div class="keyframe-track">
+                    <div class="track-header">Transform Track</div>
+                </div>
+                <div class="keyframe-track">
+                    <div class="track-header">Opacity Track</div>
+                </div>
+                <div class="keyframe-track">
+                    <div class="track-header">Color Track</div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Export Modal -->
+    <div class="modal" id="export-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Export Animation</h2>
+                <button class="close-btn" onclick="closeExportModal()">&times;</button>
+            </div>
+            <div>
+                <h3>SVG Code:</h3>
+                <div class="code-output" id="svg-output"></div>
+                <br>
+                <button class="btn btn-success" onclick="copySVGCode()">Copy to Clipboard</button>
+                <button class="btn btn-primary" onclick="downloadSVG()">Download SVG</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let currentTool = 'rectangle';
+        let isDrawing = false;
+        let selectedElement = null;
+        let elements = [];
+        let animationDuration = 3000;
+        let currentTime = 0;
+        let isPlaying = false;
+        let animationFrame = null;
+        let keyframes = [];
+        let gridVisible = false;
+
+        // SVG canvas reference
+        const canvas = document.getElementById('svg-canvas');
+        const canvasRect = canvas.getBoundingClientRect();
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeEventListeners();
+            updateElementList();
+        });
+
+        function initializeEventListeners() {
+            // Tool selection
+            document.querySelectorAll('.tool-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelector('.tool-btn.active')?.classList.remove('active');
+                    this.classList.add('active');
+                    currentTool = this.dataset.tool;
+                });
+            });
+
+            // Canvas events
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', handleMouseMove);
+            canvas.addEventListener('mouseup', stopDrawing);
+            
+            // Mouse position tracking
+            canvas.addEventListener('mousemove', function(e) {
+                const rect = canvas.getBoundingClientRect();
+                const x = Math.round((e.clientX - rect.left) * (600 / rect.width));
+                const y = Math.round((e.clientY - rect.top) * (400 / rect.height));
+                document.getElementById('mouse-pos').textContent = `Mouse: ${x}, ${y}`;
+            });
+
+            // Property inputs
+            document.getElementById('prop-x').addEventListener('input', updateSelectedElement);
+            document.getElementById('prop-y').addEventListener('input', updateSelectedElement);
+            document.getElementById('prop-width').addEventListener('input', updateSelectedElement);
+            document.getElementById('prop-height').addEventListener('input', updateSelectedElement);
+            document.getElementById('prop-rotation').addEventListener('input', updateSelectedElement);
+            document.getElementById('prop-scale').addEventListener('input', updateSelectedElement);
+
+            // Timeline
+            initializeTimeline();
+        }
+
+        function startDrawing(e) {
+            if (currentTool === 'select') return;
+            
+            isDrawing = true;
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX - rect.left) * (600 / rect.width);
+            const y = (e.clientY - rect.top) * (400 / rect.height);
+
+            const element = createElement(currentTool, x, y);
+            if (element) {
+                canvas.appendChild(element);
+                elements.push({
+                    id: element.id,
+                    element: element,
+                    type: currentTool,
+                    keyframes: []
+                });
+                selectedElement = element;
+                updateElementList();
+                updateProperties();
+            }
+        }
+
+        function handleMouseMove(e) {
+            if (!isDrawing || !selectedElement) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX - rect.left) * (600 / rect.width);
+            const y = (e.clientY - rect.top) * (400 / rect.height);
+
+            updateElementDuringDraw(selectedElement, x, y);
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        function createElement(type, x, y) {
+            const id = 'element-' + Date.now();
+            const fillColor = document.getElementById('fill-color').value;
+            const strokeColor = document.getElementById('stroke-color').value;
+            const strokeWidth = document.getElementById('stroke-width').value;
+            const opacity = document.getElementById('opacity').value;
+
+            let element;
+
+            switch(type) {
+                case 'rectangle':
+                    element = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    element.setAttribute('x', x);
+                    element.setAttribute('y', y);
+                    element.setAttribute('width', 50);
+                    element.setAttribute('height', 30);
+                    break;
+
+                case 'circle':
+                    element = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    element.setAttribute('cx', x);
+                    element.setAttribute('cy', y);
+                    element.setAttribute('r', 25);
+                    break;
+
+                case 'line':
+                    element = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    element.setAttribute('x1', x);
+                    element.setAttribute('y1', y);
+                    element.setAttribute('x2', x + 50);
+                    element.setAttribute('y2', y);
+                    break;
+
+                case 'text':
+                    element = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    element.setAttribute('x', x);
+                    element.setAttribute('y', y);
+                    element.setAttribute('font-family', 'Arial, sans-serif');
+                    element.setAttribute('font-size', '16');
+                    element.textContent = 'Sample Text';
+                    break;
+
+                case 'polygon':
+                    element = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                    const points = `${x},${y-20} ${x+20},${y+10} ${x-20},${y+10}`;
+                    element.setAttribute('points', points);
+                    break;
+
+                default:
+                    return null;
+            }
+
+            element.setAttribute('id', id);
+            element.setAttribute('fill', fillColor);
+            element.setAttribute('stroke', strokeColor);
+            element.setAttribute('stroke-width', strokeWidth);
+            element.setAttribute('opacity', opacity);
+            element.style.cursor = 'pointer';
+
+            element.addEventListener('click', function() {
+                selectElement(this);
+            });
+
+            return element;
+        }
+
+        function updateElementDuringDraw(element, x, y) {
+            const startX = parseFloat(element.getAttribute('x') || element.getAttribute('x1') || element.getAttribute('cx'));
+            const startY = parseFloat(element.getAttribute('y') || element.getAttribute('y1') || element.getAttribute('cy'));
+
+            switch(element.tagName.toLowerCase()) {
+                case 'rect':
+                    element.setAttribute('width', Math.abs(x - startX));
+                    element.setAttribute('height', Math.abs(y - startY));
+                    if (x < startX) element.setAttribute('x', x);
+                    if (y < startY) element.setAttribute('y', y);
+                    break;
+                    
+                case 'circle':
+                    const radius = Math.sqrt(Math.pow(x - startX, 2) + Math.pow(y - startY, 2));
+                    element.setAttribute('r', radius);
+                    break;
+                    
+                case 'line':
+                    element.setAttribute('x2', x);
+                    element.setAttribute('y2', y);
+                    break;
+            }
+        }
+
+        function selectElement(element) {
+            // Remove previous selection
+            document.querySelectorAll('[stroke-dasharray]').forEach(el => {
+                el.removeAttribute('stroke-dasharray');
+            });
+
+            selectedElement = element;
+            element.setAttribute('stroke-dasharray', '5,5');
+            
+            updateProperties();
+            updateElementList();
+        }
+
+        function updateProperties() {
+            if (!selectedElement) return;
+
+            const type = selectedElement.tagName.toLowerCase();
+            
+            switch(type) {
+                case 'rect':
+                    document.getElementById('prop-x').value = selectedElement.getAttribute('x');
+                    document.getElementById('prop-y').value = selectedElement.getAttribute('y');
+                    document.getElementById('prop-width').value = selectedElement.getAttribute('width');
+                    document.getElementById('prop-height').value = selectedElement.getAttribute('height');
+                    break;
+                case 'circle':
+                    document.getElementById('prop-x').value = selectedElement.getAttribute('cx');
+                    document.getElementById('prop-y').value = selectedElement.getAttribute('cy');
+                    document.getElementById('prop-width').value = selectedElement.getAttribute('r');
+                    document.getElementById('prop-height').value = selectedElement.getAttribute('r');
+                    break;
+                case 'text':
+                    document.getElementById('prop-x').value = selectedElement.getAttribute('x');
+                    document.getElementById('prop-y').value = selectedElement.getAttribute('y');
+                    break;
+            }
+        }
+
+        function updateSelectedElement() {
+            if (!selectedElement) return;
+
+            const type = selectedElement.tagName.toLowerCase();
+            const x = document.getElementById('prop-x').value;
+            const y = document.getElementById('prop-y').value;
+            const width = document.getElementById('prop-width').value;
+            const height = document.getElementById('prop-height').value;
+            const rotation = document.getElementById('prop-rotation').value;
+            const scale = document.getElementById('prop-scale').value;
+
+            switch(type) {
+                case 'rect':
+                    if (x) selectedElement.setAttribute('x', x);
+                    if (y) selectedElement.setAttribute('y', y);
+                    if (width) selectedElement.setAttribute('width', width);
+                    if (height) selectedElement.setAttribute('height', height);
+                    break;
+                case 'circle':
+                    if (x) selectedElement.setAttribute('cx', x);
+                    if (y) selectedElement.setAttribute('cy', y);
+                    if (width) selectedElement.setAttribute('r', width);
+                    break;
+                case 'text':
+                    if (x) selectedElement.setAttribute('x', x);
+                    if (y) selectedElement.setAttribute('y', y);
+                    break;
+            }
+
+            // Apply transform
+            let transform = '';
+            if (rotation != 0) {
+                const centerX = getBoundingBox(selectedElement).x + getBoundingBox(selectedElement).width / 2;
+                const centerY = getBoundingBox(selectedElement).y + getBoundingBox(selectedElement).height / 2;
+                transform += `rotate(${rotation} ${centerX} ${centerY}) `;
+            }
+            if (scale != 1) {
+                transform += `scale(${scale}) `;
+            }
+            
+            if (transform) {
+                selectedElement.setAttribute('transform', transform.trim());
+            } else {
+                selectedElement.removeAttribute('transform');
+            }
+        }
+
+        function getBoundingBox(element) {
+            try {
+                return element.getBBox();
+            } catch(e) {
+                return { x: 0, y: 0, width: 100, height: 100 };
+            }
+        }
+
+        function updateElementList() {
+            const list = document.getElementById('element-list');
+            list.innerHTML = '';
+
+            elements.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'element-item';
+                if (item.element === selectedElement) {
+                    div.classList.add('selected');
+                }
+
+                div.innerHTML = `
+                    <div>
+                        <div>${item.type.charAt(0).toUpperCase() + item.type.slice(1)} ${index + 1}</div>
+                        <div class="element-type">${item.id}</div>
+                    </div>
+                    <button onclick="deleteElement('${item.id}')" style="background:none;border:none;color:#ef4444;cursor:pointer;">✕</button>
+                `;
+
+                div.addEventListener('click', function() {
+                    selectElement(item.element);
+                });
+
+                list.appendChild(div);
+            });
+        }
+
+        function deleteElement(id) {
+            const index = elements.findIndex(item => item.id === id);
+            if (index !== -1) {
+                elements[index].element.remove();
+                elements.splice(index, 1);
+                if (selectedElement && selectedElement.id === id) {
+                    selectedElement = null;
+                }
+                updateElementList();
+            }
+        }
+
+        function clearCanvas() {
+            elements.forEach(item => item.element.remove());
+            elements = [];
+            selectedElement = null;
+            keyframes = [];
+            updateElementList();
+            updateTimelineDisplay();
+        }
+
+        function toggleGrid() {
+            gridVisible = !gridVisible;
+            const gridBg = document.getElementById('grid-bg');
+            gridBg.style.display = gridVisible ? 'block' : 'none';
+        }
+
+        // Timeline functionality
+        function initializeTimeline() {
+            const scrubber = document.getElementById('timeline-scrubber');
+            const handle = document.getElementById('timeline-handle');
+            const progress = document.getElementById('timeline-progress');
+
+            let isDragging = false;
+
+            handle.addEventListener('mousedown', function(e) {
+                isDragging = true;
+                e.preventDefault();
+            });
+
+            document.addEventListener('mousemove', function(e) {
+                if (!isDragging) return;
+
+                const rect = scrubber.getBoundingClientRect();
+                const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+                const percentage = (x / rect.width) * 100;
+
+                currentTime = (percentage / 100) * animationDuration;
+                updateTimelineDisplay();
+                seekToTime(currentTime);
+            });
+
+            document.addEventListener('mouseup', function() {
+                isDragging = false;
+            });
+
+            scrubber.addEventListener('click', function(e) {
+                if (isDragging) return;
+
+                const rect = this.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const percentage = (x / rect.width) * 100;
+
+                currentTime = (percentage / 100) * animationDuration;
+                updateTimelineDisplay();
+                seekToTime(currentTime);
+            });
+        }
+
+        function updateTimelineDisplay() {
+            const percentage = (currentTime / animationDuration) * 100;
+            const progress = document.getElementById('timeline-progress');
+            const handle = document.getElementById('timeline-handle');
+            const timeDisplay = document.getElementById('time-display');
+
+            progress.style.width = percentage + '%';
+            handle.style.left = percentage + '%';
+            timeDisplay.textContent = `${(currentTime / 1000).toFixed(1)}s / ${(animationDuration / 1000).toFixed(1)}s`;
+        }
+
+        function togglePlayback() {
+            if (isPlaying) {
+                stopAnimation();
+            } else {
+                startAnimation();
+            }
+        }
+
+        function startAnimation() {
+            isPlaying = true;
+            document.getElementById('play-btn').innerHTML = '⏸️';
+            
+            const startTime = performance.now() - currentTime;
+            
+            function animate(timestamp) {
+                currentTime = timestamp - startTime;
+                
+                if (currentTime >= animationDuration) {
+                    currentTime = 0;
+                    startTime = timestamp;
+                }
+                
+                updateTimelineDisplay();
+                applyAnimationsAtTime(currentTime);
+                
+                if (isPlaying) {
+                    animationFrame = requestAnimationFrame(animate);
+                }
+            }
+            
+            animationFrame = requestAnimationFrame(animate);
+        }
+
+        function stopAnimation() {
+            isPlaying = false;
+            document.getElementById('play-btn').innerHTML = '▶️';
+            if (animationFrame) {
+                cancelAnimationFrame(animationFrame);
+            }
+        }
+
+        function seekToTime(time) {
+            currentTime = time;
+            applyAnimationsAtTime(time);
+        }
+
+        function addKeyframe() {
+            if (!selectedElement) {
+                alert('Please select an element first');
+                return;
+            }
+
+            const elementData = elements.find(item => item.element === selectedElement);
+            if (!elementData) return;
+
+            const keyframe = {
+                time: currentTime,
+                properties: captureElementState(selectedElement)
+            };
+
+            elementData.keyframes.push(keyframe);
+            elementData.keyframes.sort((a, b) => a.time - b.time);
+
+            addKeyframeMarker(currentTime);
+            generateCSSAnimation(elementData);
+        }
+
+        function captureElementState(element) {
+            const type = element.tagName.toLowerCase();
+            const state = {
+                fill: element.getAttribute('fill'),
+                stroke: element.getAttribute('stroke'),
+                opacity: element.getAttribute('opacity'),
+                transform: element.getAttribute('transform') || ''
+            };
+
+            switch(type) {
+                case 'rect':
+                    state.x = element.getAttribute('x');
+                    state.y = element.getAttribute('y');
+                    state.width = element.getAttribute('width');
+                    state.height = element.getAttribute('height');
+                    break;
+                case 'circle':
+                    state.cx = element.getAttribute('cx');
+                    state.cy = element.getAttribute('cy');
+                    state.r = element.getAttribute('r');
+                    break;
+                case 'text':
+                    state.x = element.getAttribute('x');
+                    state.y = element.getAttribute('y');
+                    break;
+            }
+
+            return state;
+        }
+
+        function addKeyframeMarker(time) {
+            const tracks = document.querySelectorAll('.keyframe-track');
+            const percentage = (time / animationDuration) * 100;
+
+            tracks.forEach(track => {
+                const marker = document.createElement('div');
+                marker.className = 'keyframe-marker';
+                marker.style.left = percentage + '%';
+                marker.addEventListener('click', function() {
+                    currentTime = time;
+                    updateTimelineDisplay();
+                    seekToTime(time);
+                });
+                track.appendChild(marker);
+            });
+        }
+
+        function generateCSSAnimation(elementData) {
+            if (elementData.keyframes.length < 2) return;
+
+            // Generate CSS animation
+            let animationCSS = `@keyframes ${elementData.id}-anim {\n`;
+            
+            elementData.keyframes.forEach(keyframe => {
+                const percentage = (keyframe.time / animationDuration) * 100;
+                animationCSS += `  ${percentage.toFixed(1)}% {\n`;
+                
+                Object.entries(keyframe.properties).forEach(([prop, value]) => {
+                    if (value) {
+                        animationCSS += `    ${prop}: ${value};\n`;
+                    }
+                });
+                
+                animationCSS += `  }\n`;
+            });
+            
+            animationCSS += `}`;
+
+            // Apply animation
+            const style = document.createElement('style');
+            style.textContent = animationCSS;
+            document.head.appendChild(style);
+
+            elementData.element.style.animation = `${elementData.id}-anim ${animationDuration}ms infinite linear`;
+        }
+
+        function applyAnimationsAtTime(time) {
+            elements.forEach(elementData => {
+                if (elementData.keyframes.length < 2) return;
+
+                // Find surrounding keyframes
+                let prevKeyframe = null;
+                let nextKeyframe = null;
+
+                for (let i = 0; i < elementData.keyframes.length; i++) {
+                    const keyframe = elementData.keyframes[i];
+                    if (keyframe.time <= time) {
+                        prevKeyframe = keyframe;
+                    }
+                    if (keyframe.time >= time && !nextKeyframe) {
+                        nextKeyframe = keyframe;
+                        break;
+                    }
+                }
+
+                if (prevKeyframe && nextKeyframe && prevKeyframe !== nextKeyframe) {
+                    // Interpolate between keyframes
+                    const progress = (time - prevKeyframe.time) / (nextKeyframe.time - prevKeyframe.time);
+                    interpolateElementState(elementData.element, prevKeyframe.properties, nextKeyframe.properties, progress);
+                } else if (prevKeyframe) {
+                    // Apply single keyframe
+                    applyElementState(elementData.element, prevKeyframe.properties);
+                }
+            });
+        }
+
+        function interpolateElementState(element, startState, endState, progress) {
+            const type = element.tagName.toLowerCase();
+
+            // Interpolate numeric properties
+            switch(type) {
+                case 'rect':
+                    if (startState.x && endState.x) {
+                        const x = parseFloat(startState.x) + (parseFloat(endState.x) - parseFloat(startState.x)) * progress;
+                        element.setAttribute('x', x);
+                    }
+                    if (startState.y && endState.y) {
+                        const y = parseFloat(startState.y) + (parseFloat(endState.y) - parseFloat(startState.y)) * progress;
+                        element.setAttribute('y', y);
+                    }
+                    break;
+                case 'circle':
+                    if (startState.cx && endState.cx) {
+                        const cx = parseFloat(startState.cx) + (parseFloat(endState.cx) - parseFloat(startState.cx)) * progress;
+                        element.setAttribute('cx', cx);
+                    }
+                    if (startState.cy && endState.cy) {
+                        const cy = parseFloat(startState.cy) + (parseFloat(endState.cy) - parseFloat(startState.cy)) * progress;
+                        element.setAttribute('cy', cy);
+                    }
+                    break;
+            }
+
+            // Interpolate opacity
+            if (startState.opacity && endState.opacity) {
+                const opacity = parseFloat(startState.opacity) + (parseFloat(endState.opacity) - parseFloat(startState.opacity)) * progress;
+                element.setAttribute('opacity', opacity);
+            }
+        }
+
+        function applyElementState(element, state) {
+            Object.entries(state).forEach(([prop, value]) => {
+                if (value) {
+                    element.setAttribute(prop, value);
+                }
+            });
+        }
+
+        function addMotionPath() {
+            if (!selectedElement) {
+                alert('Please select an element first');
+                return;
+            }
+
+            // Create a simple motion path animation
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', 'M 100 200 Q 300 100 500 200');
+            path.setAttribute('stroke', '#6366f1');
+            path.setAttribute('stroke-width', '2');
+            path.setAttribute('fill', 'none');
+            path.setAttribute('opacity', '0.5');
+            path.id = 'motion-path-' + Date.now();
+
+            canvas.appendChild(path);
+
+            // Create animateMotion element
+            const animateMotion = document.createElementNS('http://www.w3.org/2000/svg', 'animateMotion');
+            animateMotion.setAttribute('dur', (animationDuration / 1000) + 's');
+            animateMotion.setAttribute('repeatCount', 'indefinite');
+
+            const mpath = document.createElementNS('http://www.w3.org/2000/svg', 'mpath');
+            mpath.setAttributeNS('http://www.w3.org/1999/xlink', 'href', '#' + path.id);
+
+            animateMotion.appendChild(mpath);
+            selectedElement.appendChild(animateMotion);
+        }
+
+        // Export functionality
+        function exportAnimation() {
+            const svgContent = generateExportSVG();
+            document.getElementById('svg-output').textContent = svgContent;
+            document.getElementById('export-modal').style.display = 'block';
+        }
+
+        function generateExportSVG() {
+            const svgClone = canvas.cloneNode(true);
+            
+            // Remove selection indicators
+            svgClone.querySelectorAll('[stroke-dasharray]').forEach(el => {
+                el.removeAttribute('stroke-dasharray');
+            });
+
+            // Remove grid
+            const grid = svgClone.querySelector('#grid-bg');
+            if (grid) grid.remove();
+
+            // Add CSS animations to the SVG
+            let cssAnimations = '';
+            elements.forEach(elementData => {
+                if (elementData.keyframes.length >= 2) {
+                    cssAnimations += generateCSSAnimationString(elementData);
+                }
+            });
+
+            if (cssAnimations) {
+                const style = document.createElement('style');
+                style.textContent = cssAnimations;
+                svgClone.insertBefore(style, svgClone.firstChild);
+            }
+
+            // Wrap in proper SVG structure
+            const fullSVG = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
+     width="600" height="400" viewBox="0 0 600 400">
+${cssAnimations ? `<defs><style><![CDATA[${cssAnimations}]]></style></defs>` : ''}
+${svgClone.innerHTML}
+</svg>`;
+
+            return fullSVG;
+        }
+
+        function generateCSSAnimationString(elementData) {
+            if (elementData.keyframes.length < 2) return '';
+
+            let css = `#${elementData.id} { animation: ${elementData.id}-anim ${animationDuration}ms infinite linear; }\n`;
+            css += `@keyframes ${elementData.id}-anim {\n`;
+
+            elementData.keyframes.forEach(keyframe => {
+                const percentage = (keyframe.time / animationDuration) * 100;
+                css += `  ${percentage.toFixed(1)}% {\n`;
+
+                Object.entries(keyframe.properties).forEach(([prop, value]) => {
+                    if (value && prop !== 'transform') {
+                        css += `    ${prop}: ${value};\n`;
+                    }
+                });
+
+                if (keyframe.properties.transform) {
+                    css += `    transform: ${keyframe.properties.transform};\n`;
+                }
+
+                css += `  }\n`;
+            });
+
+            css += `}\n\n`;
+            return css;
+        }
+
+        function closeExportModal() {
+            document.getElementById('export-modal').style.display = 'none';
+        }
+
+        function copySVGCode() {
+            const code = document.getElementById('svg-output').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('SVG code copied to clipboard!');
+            });
+        }
+
+        function downloadSVG() {
+            const code = document.getElementById('svg-output').textContent;
+            const blob = new Blob([code], { type: 'image/svg+xml' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'animation.svg';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 's':
+                        e.preventDefault();
+                        exportAnimation();
+                        break;
+                    case 'z':
+                        e.preventDefault();
+                        // Undo functionality could be added here
+                        break;
+                    case 'c':
+                        if (selectedElement) {
+                            e.preventDefault();
+                            // Copy functionality could be added here
+                        }
+                        break;
+                }
+            }
+            
+            if (e.key === 'Delete' && selectedElement) {
+                deleteElement(selectedElement.id);
+            }
+            
+            if (e.key === ' ') {
+                e.preventDefault();
+                togglePlayback();
+            }
+        });
+
+        // Initialize with a sample animation
+        setTimeout(() => {
+            // Create a sample rectangle
+            const rect = createElement('rectangle', 50, 50);
+            if (rect) {
+                canvas.appendChild(rect);
+                elements.push({
+                    id: rect.id,
+                    element: rect,
+                    type: 'rectangle',
+                    keyframes: []
+                });
+                
+                selectElement(rect);
+                updateElementList();
+                
+                // Add some sample keyframes
+                addKeyframe(); // Initial position
+                
+                currentTime = 1000;
+                updateTimelineDisplay();
+                document.getElementById('prop-x').value = 300;
+                updateSelectedElement();
+                addKeyframe(); // Middle position
+                
+                currentTime = 2000;
+                updateTimelineDisplay();
+                document.getElementById('prop-x').value = 500;
+                document.getElementById('prop-rotation').value = 180;
+                updateSelectedElement();
+                addKeyframe(); // Final position
+                
+                currentTime = 0;
+                updateTimelineDisplay();
+                seekToTime(0);
+            }
+        }, 500);
+    </script>
+</body>
+</html>
