@@ -1,0 +1,1929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVG Animation Studio Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6a11cb;
+            --secondary: #2575fc;
+            --dark: #1a1c2c;
+            --darker: #0f1120;
+            --light: #f8f9fa;
+            --accent: #ff3e7f;
+            --success: #00d1b2;
+            --warning: #ffdd57;
+            --danger: #ff3860;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+            color: var(--light);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .app-container {
+            display: flex;
+            height: 100vh;
+            background: rgba(26, 28, 44, 0.95);
+            backdrop-filter: blur(10px);
+        }
+
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, var(--darker) 0%, var(--dark) 100%);
+            color: white;
+            padding: 20px;
+            overflow-y: auto;
+            box-shadow: 2px 0 15px rgba(0,0,0,0.3);
+            border-right: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .toolbar {
+            height: 60px;
+            background: linear-gradient(90deg, var(--dark) 0%, var(--darker) 100%);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            gap: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .workspace {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .canvas-container {
+            flex: 1;
+            background: var(--darker);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .canvas {
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 25% 25%, rgba(255,255,255,0.05) 1px, transparent 1px),
+                radial-gradient(circle at 75% 75%, rgba(255,255,255,0.05) 1px, transparent 1px);
+            background-size: 30px 30px;
+            cursor: crosshair;
+        }
+
+        .properties-panel {
+            width: 320px;
+            background: var(--dark);
+            padding: 20px;
+            border-left: 1px solid rgba(255,255,255,0.05);
+            overflow-y: auto;
+            box-shadow: -2px 0 15px rgba(0,0,0,0.1);
+        }
+
+        .btn {
+            background: linear-gradient(45deg, var(--secondary), var(--primary));
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .btn.active {
+            background: linear-gradient(45deg, var(--accent), #ff2b67);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .section {
+            margin-bottom: 25px;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .section h3 {
+            margin-bottom: 15px;
+            color: #ecf0f1;
+            font-size: 16px;
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+            padding-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #ecf0f1;
+            font-size: 14px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 6px;
+            background: rgba(255,255,255,0.05);
+            color: white;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--secondary);
+            background: rgba(255,255,255,0.1);
+            box-shadow: 0 0 0 2px rgba(37, 117, 252, 0.3);
+        }
+
+        .color-input {
+            width: 50px;
+            height: 35px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background: transparent;
+        }
+
+        .timeline {
+            height: 140px;
+            background: var(--dark);
+            border-top: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .timeline-controls {
+            height: 40px;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            gap: 10px;
+            background: var(--darker);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .timeline-track {
+            flex: 1;
+            background: var(--darker);
+            position: relative;
+            overflow-x: auto;
+            padding: 20px 0;
+        }
+
+        .timeline-ruler {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 2000px;
+            height: 20px;
+            background: rgba(255,255,255,0.03);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .keyframe {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            background: var(--accent);
+            border-radius: 50%;
+            cursor: pointer;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+            box-shadow: 0 0 0 2px var(--darker), 0 2px 6px rgba(0,0,0,0.3);
+            transition: all 0.2s ease;
+        }
+
+        .keyframe:hover {
+            transform: translateY(-50%) scale(1.2);
+            box-shadow: 0 0 0 3px var(--darker), 0 3px 8px rgba(0,0,0,0.4);
+        }
+
+        .keyframe.selected {
+            background: var(--success);
+            box-shadow: 0 0 0 3px var(--darker), 0 0 10px rgba(0, 209, 178, 0.5);
+        }
+
+        .play-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--success);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            transition: all 0.2s ease;
+        }
+
+        .play-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .play-btn.paused::before {
+            content: "▶";
+        }
+
+        .play-btn.playing::before {
+            content: "⏸";
+        }
+
+        .element-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            margin: 5px 0;
+            background: rgba(255,255,255,0.05);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .element-item:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateX(3px);
+        }
+
+        .element-item.selected {
+            background: linear-gradient(45deg, rgba(37, 117, 252, 0.5), rgba(106, 17, 203, 0.5));
+            border-left: 3px solid var(--secondary);
+        }
+
+        .element-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .element-actions button {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.6);
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .element-actions button:hover {
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .export-panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--dark);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            max-width: 80%;
+            max-height: 80%;
+            z-index: 1000;
+            display: none;
+            border: 1px solid rgba(255,255,255,0.1);
+            width: 600px;
+        }
+
+        .export-code {
+            background: var(--darker);
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Fira Code', monospace;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+            font-size: 14px;
+            margin: 15px 0;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 999;
+            display: none;
+            backdrop-filter: blur(5px);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ff9a9e, #fad0c4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .status-bar {
+            height: 30px;
+            background: var(--darker);
+            color: rgba(255,255,255,0.7);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            font-size: 12px;
+            gap: 20px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .shape-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .shape-btn {
+            width: 42px;
+            height: 42px;
+            border: 2px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            color: white;
+            font-size: 18px;
+        }
+
+        .shape-btn:hover, .shape-btn.active {
+            background: linear-gradient(45deg, var(--secondary), var(--primary));
+            border-color: transparent;
+            transform: scale(1.1);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .animation-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.05);
+            padding: 6px 12px;
+            border-radius: 8px;
+        }
+
+        .slider {
+            width: 100px;
+        }
+
+        svg {
+            pointer-events: none;
+        }
+
+        svg .svg-element {
+            pointer-events: all;
+            cursor: move;
+        }
+
+        svg .svg-element:hover {
+            filter: brightness(1.2);
+        }
+
+        svg .svg-element.selected {
+            stroke: var(--secondary);
+            stroke-width: 2;
+            stroke-dasharray: 5,5;
+            outline: none;
+        }
+
+        .tutorial-panel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--dark);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            max-width: 300px;
+            z-index: 100;
+            display: none;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .tutorial-panel h3 {
+            margin-bottom: 15px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tutorial-panel ol {
+            padding-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .tutorial-panel li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .panel-header h2 {
+            font-size: 20px;
+            font-weight: 600;
+            background: linear-gradient(45deg, var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.6);
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .close-btn:hover {
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .properties-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .properties-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+            margin: 0;
+            border: none;
+            padding: 0;
+        }
+
+        .tab-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .tab {
+            padding: 8px 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .tab.active {
+            background: linear-gradient(45deg, var(--secondary), var(--primary));
+        }
+
+        .easing-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .easing-option {
+            padding: 8px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 6px;
+            text-align: center;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .easing-option:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .easing-option.selected {
+            background: var(--secondary);
+        }
+
+        .keyframe-editor {
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .keyframe-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .keyframe-time {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .keyframe-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .keyframe-properties {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .pen-tool-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .pen-tool-btn {
+            flex: 1;
+            padding: 8px;
+            text-align: center;
+            background: rgba(255,255,255,0.05);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .pen-tool-btn.active {
+            background: var(--secondary);
+        }
+
+        .grid-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+            pointer-events: none;
+        }
+
+        .grid-toggle {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            z-index: 10;
+            background: rgba(26, 28, 44, 0.8);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 12px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .preview-pane {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 200px;
+            height: 150px;
+            background: var(--dark);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            z-index: 10;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .preview-header {
+            background: var(--darker);
+            padding: 8px;
+            font-size: 12px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .preview-content {
+            width: 100%;
+            height: calc(100% - 30px);
+        }
+
+        .tooltip {
+            position: absolute;
+            background: rgba(26, 28, 44, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            z-index: 1000;
+            pointer-events: none;
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(5px);
+            transform: translateY(-100%);
+            max-width: 200px;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M14.5 8.5L12 6L9.5 8.5M9.5 15.5L12 18L14.5 15.5M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="url(#paint0_linear)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <defs>
+                        <linearGradient id="paint0_linear" x1="12" y1="3" x2="12" y2="21" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#6a11cb"/>
+                            <stop offset="1" stop-color="#2575fc"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+                SVG Studio Pro
+            </div>
+            
+            <div class="section">
+                <h3>🛠️ Tools</h3>
+                <div class="shape-buttons">
+                    <button class="shape-btn" data-tool="select" title="Select">✏️</button>
+                    <button class="shape-btn" data-tool="rect" title="Rectangle">▭</button>
+                    <button class="shape-btn" data-tool="circle" title="Circle">●</button>
+                    <button class="shape-btn" data-tool="ellipse" title="Ellipse">⬯</button>
+                    <button class="shape-btn" data-tool="line" title="Line">╱</button>
+                    <button class="shape-btn" data-tool="polygon" title="Polygon">⬢</button>
+                    <button class="shape-btn" data-tool="path" title="Pen Tool">✒️</button>
+                    <button class="shape-btn" data-tool="text" title="Text">T</button>
+                </div>
+                <div class="pen-tool-options">
+                    <div class="pen-tool-btn active" data-pen-mode="draw">Draw</div>
+                    <div class="pen-tool-btn" data-pen-mode="edit">Edit</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>🎨 Elements</h3>
+                <div id="elementsList"></div>
+            </div>
+
+            <div class="section">
+                <h3>⚡ Actions</h3>
+                <div class="animation-controls" style="flex-wrap: wrap;">
+                    <button class="btn" onclick="clearCanvas()">🗑️ Clear</button>
+                    <button class="btn" onclick="showExportPanel()">💾 Export</button>
+                    <button class="btn" onclick="importSVG()">📥 Import</button>
+                    <button class="btn" onclick="showTutorial()">❓ Tutorial</button>
+                </div>
+                <div style="margin-top: 15px;">
+                    <button class="btn btn-outline" onclick="addGradient()">🌈 Add Gradient</button>
+                    <button class="btn btn-outline" onclick="addFilter()">✨ Add Filter</button>
+                </div>
+            </div>
+            
+            <div class="section" style="margin-top: auto;">
+                <h3>🔧 Settings</h3>
+                <div class="form-group">
+                    <label>Grid Size</label>
+                    <input type="range" class="form-control" min="10" max="50" value="20" id="gridSize">
+                </div>
+                <div class="form-group">
+                    <label>Snap to Grid</label>
+                    <input type="checkbox" id="snapToggle" checked>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Toolbar -->
+            <div class="toolbar">
+                <div class="animation-controls">
+                    <button class="play-btn paused" onclick="toggleAnimation()"></button>
+                    <div class="slider-group">
+                        <label>Speed:</label>
+                        <input type="range" class="slider" id="speedSlider" min="0.1" max="3" step="0.1" value="1">
+                        <span id="speedValue">1x</span>
+                    </div>
+                    <div class="slider-group">
+                        <label>Duration:</label>
+                        <input type="range" id="durationSlider" min="1" max="10" value="3">
+                        <span id="durationValue">3s</span>
+                    </div>
+                    <button class="btn" onclick="addKeyframe()">⏺️ Add Keyframe</button>
+                    <button class="btn" onclick="resetAnimation()">↺ Reset</button>
+                </div>
+            </div>
+
+            <!-- Workspace -->
+            <div class="workspace">
+                <div class="canvas-container">
+                    <div class="grid-overlay" id="gridOverlay"></div>
+                    <button class="grid-toggle" onclick="toggleGrid()">
+                        <span>Grid</span>
+                        <span id="gridIcon">✓</span>
+                    </button>
+                    <svg class="canvas" id="canvas" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <filter id="blur-effect" x="-20%" y="-20%" width="140%" height="140%">
+                                <feGaussianBlur in="SourceGraphic" stdDeviation="5" />
+                            </filter>
+                            <linearGradient id="sample-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stop-color="#3498db" />
+                                <stop offset="100%" stop-color="#9b59b6" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    <div class="preview-pane">
+                        <div class="preview-header">Animation Preview</div>
+                        <div class="preview-content" id="previewContent"></div>
+                    </div>
+                </div>
+
+                <!-- Properties Panel -->
+                <div class="properties-panel">
+                    <div class="properties-header">
+                        <h3>Properties</h3>
+                        <div>
+                            <button class="btn btn-outline" onclick="duplicateElement(selectedElement.id)">Duplicate</button>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-container">
+                        <div class="tab active" data-tab="shape">Shape</div>
+                        <div class="tab" data-tab="animation">Animation</div>
+                        <div class="tab" data-tab="effects">Effects</div>
+                    </div>
+                    
+                    <div id="propertiesContent">
+                        <p>Select an element to edit properties</p>
+                    </div>
+                    
+                    <div class="keyframe-editor" id="keyframeEditor" style="display: none;">
+                        <div class="keyframe-header">
+                            <div class="keyframe-time">
+                                <label>Time:</label>
+                                <input type="number" class="form-control" style="width: 80px;" value="0" min="0" max="10" step="0.1">s
+                            </div>
+                            <div class="keyframe-controls">
+                                <button class="btn btn-outline" style="padding: 5px 8px;">✕</button>
+                                <button class="btn" style="padding: 5px 8px;">✓</button>
+                            </div>
+                        </div>
+                        <div class="keyframe-properties">
+                            <div class="form-group">
+                                <label>Position X</label>
+                                <input type="number" class="form-control" value="0">
+                            </div>
+                            <div class="form-group">
+                                <label>Position Y</label>
+                                <input type="number" class="form-control" value="0">
+                            </div>
+                            <div class="form-group">
+                                <label>Rotation</label>
+                                <input type="number" class="form-control" value="0" min="0" max="360">
+                            </div>
+                            <div class="form-group">
+                                <label>Scale</label>
+                                <input type="number" class="form-control" value="1" min="0.1" max="5" step="0.1">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Easing</label>
+                            <div class="easing-selector">
+                                <div class="easing-option selected">Linear</div>
+                                <div class="easing-option">EaseIn</div>
+                                <div class="easing-option">EaseOut</div>
+                                <div class="easing-option">EaseInOut</div>
+                                <div class="easing-option">Bounce</div>
+                                <div class="easing-option">Elastic</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timeline -->
+            <div class="timeline">
+                <div class="timeline-controls">
+                    <span>Timeline</span>
+                    <button class="btn" onclick="addKeyframe()">⏺️ Add Keyframe</button>
+                    <button class="btn btn-outline" onclick="removeKeyframe()">🗑️ Remove</button>
+                </div>
+                <div class="timeline-track" id="timelineTrack">
+                    <div class="timeline-ruler"></div>
+                    <div class="keyframe" style="left: 50px;"></div>
+                    <div class="keyframe" style="left: 150px;"></div>
+                    <div class="keyframe" style="left: 250px;"></div>
+                    <div class="keyframe selected" style="left: 350px;"></div>
+                </div>
+            </div>
+
+            <!-- Status Bar -->
+            <div class="status-bar">
+                <span id="mousePosition">Mouse: (0, 0)</span>
+                <span id="elementCount">Elements: 0</span>
+                <span>Current Tool: Select</span>
+                <span>FPS: 60</span>
+                <span style="margin-left: auto;">Ready</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Panel -->
+    <div class="overlay" id="overlay" onclick="hideExportPanel()"></div>
+    <div class="export-panel" id="exportPanel">
+        <div class="panel-header">
+            <h2>Export SVG</h2>
+            <button class="close-btn" onclick="hideExportPanel()">×</button>
+        </div>
+        <div class="export-options" style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <button class="btn active">SVG Code</button>
+            <button class="btn btn-outline">PNG</button>
+            <button class="btn btn-outline">GIF</button>
+        </div>
+        <div class="export-code" id="exportCode"></div>
+        <div style="margin-top: 20px; text-align: right; display: flex; justify-content: space-between;">
+            <div>
+                <input type="checkbox" id="minifyOption">
+                <label for="minifyOption">Minify output</label>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn" onclick="copyToClipboard()">📋 Copy Code</button>
+                <button class="btn" onclick="downloadSVG()">💾 Download</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tutorial Panel -->
+    <div class="tutorial-panel" id="tutorialPanel">
+        <h3>🎓 Quick Tutorial</h3>
+        <ol>
+            <li>Select a tool from the sidebar</li>
+            <li>Click and drag on canvas to create shapes</li>
+            <li>Select elements to modify properties</li>
+            <li>Add animations using keyframes</li>
+            <li>Apply gradients and filters</li>
+            <li>Export your creation as SVG</li>
+        </ol>
+        <div style="text-align: right;">
+            <button class="btn" onclick="hideTutorial()">Got it!</button>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced global state
+        let currentTool = 'select';
+        let selectedElement = null;
+        let elements = [];
+        let isDrawing = false;
+        let startPoint = { x: 0, y: 0 };
+        let animationId = null;
+        let animationSpeed = 1;
+        let animationDuration = 3;
+        let keyframes = [];
+        let isAnimating = false;
+        let isGridVisible = true;
+        let gridSize = 20;
+        let pathPoints = [];
+        let isPathDrawing = false;
+        let currentPenMode = 'draw';
+        
+        // Sample elements for initial demo
+        const sampleElements = [
+            { id: 'element-1', type: 'rect', x: 100, y: 100, width: 120, height: 80, fill: '#3498db' },
+            { id: 'element-2', type: 'circle', cx: 300, cy: 200, r: 60, fill: '#e74c3c' },
+            { id: 'element-3', type: 'text', x: 500, y: 150, text: 'SVG Studio', fontSize: 32, fill: '#9b59b6' }
+        ];
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeEventListeners();
+            createSampleElements();
+            updateElementsList();
+            updateGrid();
+            showTutorial();
+        });
+
+        function createSampleElements() {
+            const canvas = document.getElementById('canvas');
+            
+            sampleElements.forEach(item => {
+                let element;
+                
+                switch (item.type) {
+                    case 'rect':
+                        element = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                        element.setAttribute('x', item.x);
+                        element.setAttribute('y', item.y);
+                        element.setAttribute('width', item.width);
+                        element.setAttribute('height', item.height);
+                        element.setAttribute('fill', item.fill);
+                        break;
+                        
+                    case 'circle':
+                        element = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                        element.setAttribute('cx', item.cx);
+                        element.setAttribute('cy', item.cy);
+                        element.setAttribute('r', item.r);
+                        element.setAttribute('fill', item.fill);
+                        break;
+                        
+                    case 'text':
+                        element = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                        element.setAttribute('x', item.x);
+                        element.setAttribute('y', item.y);
+                        element.setAttribute('fill', item.fill);
+                        element.setAttribute('font-size', item.fontSize);
+                        element.setAttribute('font-family', 'Poppins, sans-serif');
+                        element.setAttribute('font-weight', 'bold');
+                        element.textContent = item.text;
+                        break;
+                }
+                
+                if (element) {
+                    element.classList.add('svg-element');
+                    element.id = item.id;
+                    canvas.appendChild(element);
+                    
+                    elements.push({
+                        id: element.id,
+                        element: element,
+                        type: item.type,
+                        animations: []
+                    });
+                }
+            });
+            
+            updateElementsList();
+        }
+
+        function initializeEventListeners() {
+            const canvas = document.getElementById('canvas');
+            
+            // Tool selection
+            document.querySelectorAll('.shape-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    selectTool(this.dataset.tool);
+                    document.getElementById('status-bar').textContent = `Current Tool: ${this.dataset.tool.charAt(0).toUpperCase() + this.dataset.tool.slice(1)}`;
+                });
+            });
+
+            // Pen mode selection
+            document.querySelectorAll('.pen-tool-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.pen-tool-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentPenMode = this.dataset.penMode;
+                });
+            });
+
+            // Canvas events
+            canvas.addEventListener('mousedown', handleMouseDown);
+            canvas.addEventListener('mousemove', handleMouseMove);
+            canvas.addEventListener('mouseup', handleMouseUp);
+            
+            // Track mouse position
+            canvas.addEventListener('mousemove', function(e) {
+                const rect = canvas.getBoundingClientRect();
+                const x = Math.round((e.clientX - rect.left) * (800 / rect.width));
+                const y = Math.round((e.clientY - rect.top) * (600 / rect.height));
+                document.getElementById('mousePosition').textContent = `Mouse: (${x}, ${y})`;
+            });
+
+            // Speed slider
+            document.getElementById('speedSlider').addEventListener('input', function() {
+                animationSpeed = parseFloat(this.value);
+                document.getElementById('speedValue').textContent = `${animationSpeed}x`;
+            });
+
+            // Duration slider
+            document.getElementById('durationSlider').addEventListener('input', function() {
+                animationDuration = parseInt(this.value);
+                document.getElementById('durationValue').textContent = `${animationDuration}s`;
+            });
+
+            // Grid settings
+            document.getElementById('gridSize').addEventListener('input', function() {
+                gridSize = parseInt(this.value);
+                updateGrid();
+            });
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Delete' && selectedElement) {
+                    deleteSelectedElement();
+                } else if (e.ctrlKey && e.key === 's') {
+                    e.preventDefault();
+                    showExportPanel();
+                } else if (e.key === 'Escape') {
+                    selectTool('select');
+                } else if (e.key === 'g') {
+                    toggleGrid();
+                } else if (e.key === 't') {
+                    showTutorial();
+                }
+            });
+            
+            // Tab switching
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    // In a real implementation, you would switch the properties panel content here
+                });
+            });
+        }
+
+        function selectTool(tool) {
+            currentTool = tool;
+            document.querySelectorAll('.shape-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.tool === tool);
+            });
+            
+            const canvas = document.getElementById('canvas');
+            canvas.style.cursor = tool === 'select' ? 'default' : 'crosshair';
+            
+            // Reset path drawing when switching tools
+            if (tool !== 'path') {
+                isPathDrawing = false;
+                pathPoints = [];
+            }
+        }
+        
+        function toggleGrid() {
+            isGridVisible = !isGridVisible;
+            document.getElementById('gridOverlay').style.display = isGridVisible ? 'block' : 'none';
+            document.getElementById('gridIcon').textContent = isGridVisible ? '✓' : '✕';
+        }
+        
+        function updateGrid() {
+            const gridOverlay = document.getElementById('gridOverlay');
+            gridOverlay.style.backgroundSize = `${gridSize}px ${gridSize}px`;
+        }
+
+        function handleMouseDown(e) {
+            const rect = e.target.closest('svg').getBoundingClientRect();
+            const x = (e.clientX - rect.left) * (800 / rect.width);
+            const y = (e.clientY - rect.top) * (600 / rect.height);
+            startPoint = { x, y };
+            
+            if (currentTool === 'select') {
+                if (e.target.classList.contains('svg-element')) {
+                    selectElement(e.target);
+                } else {
+                    deselectAll();
+                }
+            } else if (currentTool === 'path') {
+                if (currentPenMode === 'draw') {
+                    isPathDrawing = true;
+                    startPathDrawing(startPoint);
+                } else {
+                    // Edit mode - would implement point selection here
+                }
+            } else {
+                isDrawing = true;
+                createShape(currentTool, startPoint);
+            }
+        }
+        
+        function startPathDrawing(point) {
+            const canvas = document.getElementById('canvas');
+            pathPoints = [point];
+            
+            // Create a new path element
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.id = 'element-' + Date.now();
+            path.classList.add('svg-element');
+            path.setAttribute('fill', 'none');
+            path.setAttribute('stroke', '#3498db');
+            path.setAttribute('stroke-width', '3');
+            canvas.appendChild(path);
+            
+            // Add to elements array
+            const elementData = {
+                id: path.id,
+                element: path,
+                type: 'path',
+                animations: []
+            };
+            elements.push(elementData);
+            selectElement(path);
+            updateElementsList();
+        }
+        
+        function updatePathWhileDrawing(point) {
+            if (!selectedElement || selectedElement.tagName !== 'path' || !isPathDrawing) return;
+            
+            pathPoints.push(point);
+            
+            // Build the path data string
+            let d = `M ${pathPoints[0].x} ${pathPoints[0].y}`;
+            for (let i = 1; i < pathPoints.length; i++) {
+                d += ` L ${pathPoints[i].x} ${pathPoints[i].y}`;
+            }
+            
+            selectedElement.setAttribute('d', d);
+        }
+
+        function handleMouseMove(e) {
+            if (!isDrawing && !isPathDrawing) return;
+            
+            const rect = e.target.closest('svg').getBoundingClientRect();
+            const currentPoint = {
+                x: (e.clientX - rect.left) * (800 / rect.width),
+                y: (e.clientY - rect.top) * (600 / rect.height)
+            };
+            
+            if (currentTool === 'path' && isPathDrawing) {
+                updatePathWhileDrawing(currentPoint);
+            } else if (isDrawing) {
+                updateShapeWhileDrawing(currentPoint);
+            }
+        }
+
+        function handleMouseUp(e) {
+            if (isDrawing) {
+                isDrawing = false;
+                finalizeShape();
+            }
+            
+            if (isPathDrawing) {
+                isPathDrawing = false;
+                // For paths, we finalize when double-clicking or pressing Enter
+            }
+        }
+        
+        function addGradient() {
+            if (!selectedElement) return;
+            
+            const defs = document.querySelector('defs');
+            const gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+            const gradientId = 'gradient-' + Date.now();
+            
+            gradient.id = gradientId;
+            gradient.setAttribute('x1', '0%');
+            gradient.setAttribute('y1', '0%');
+            gradient.setAttribute('x2', '100%');
+            gradient.setAttribute('y2', '0%');
+            
+            const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+            stop1.setAttribute('offset', '0%');
+            stop1.setAttribute('stop-color', '#3498db');
+            
+            const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+            stop2.setAttribute('offset', '100%');
+            stop2.setAttribute('stop-color', '#9b59b6');
+            
+            gradient.appendChild(stop1);
+            gradient.appendChild(stop2);
+            defs.appendChild(gradient);
+            
+            selectedElement.setAttribute('fill', `url(#${gradientId})`);
+        }
+        
+        function addFilter() {
+            if (!selectedElement) return;
+            
+            const defs = document.querySelector('defs');
+            const filter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
+            const filterId = 'filter-' + Date.now();
+            
+            filter.id = filterId;
+            filter.setAttribute('x', '-20%');
+            filter.setAttribute('y', '-20%');
+            filter.setAttribute('width', '140%');
+            filter.setAttribute('height', '140%');
+            
+            const blur = document.createElementNS('http://www.w3.org/2000/svg', 'feGaussianBlur');
+            blur.setAttribute('in', 'SourceGraphic');
+            blur.setAttribute('stdDeviation', '5');
+            
+            filter.appendChild(blur);
+            defs.appendChild(filter);
+            
+            selectedElement.setAttribute('filter', `url(#${filterId})`);
+        }
+
+        // Other functions remain similar but with enhanced implementations
+        // (createShape, updateShapeWhileDrawing, etc.)
+
+        function createShape(type, point) {
+            const canvas = document.getElementById('canvas');
+            let element;
+            
+            switch (type) {
+                case 'rect':
+                    element = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    element.setAttribute('x', point.x);
+                    element.setAttribute('y', point.y);
+                    element.setAttribute('width', 0);
+                    element.setAttribute('height', 0);
+                    element.setAttribute('fill', '#3498db');
+                    break;
+                    
+                case 'circle':
+                    element = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    element.setAttribute('cx', point.x);
+                    element.setAttribute('cy', point.y);
+                    element.setAttribute('r', 0);
+                    element.setAttribute('fill', '#e74c3c');
+                    break;
+                    
+                case 'ellipse':
+                    element = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+                    element.setAttribute('cx', point.x);
+                    element.setAttribute('cy', point.y);
+                    element.setAttribute('rx', 0);
+                    element.setAttribute('ry', 0);
+                    element.setAttribute('fill', '#9b59b6');
+                    break;
+                    
+                case 'line':
+                    element = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    element.setAttribute('x1', point.x);
+                    element.setAttribute('y1', point.y);
+                    element.setAttribute('x2', point.x);
+                    element.setAttribute('y2', point.y);
+                    element.setAttribute('stroke', '#2c3e50');
+                    element.setAttribute('stroke-width', '2');
+                    break;
+                    
+                case 'polygon':
+                    element = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                    const points = generatePolygonPoints(point.x, point.y, 0, 6);
+                    element.setAttribute('points', points);
+                    element.setAttribute('fill', '#f39c12');
+                    break;
+                    
+                case 'text':
+                    element = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    element.setAttribute('x', point.x);
+                    element.setAttribute('y', point.y);
+                    element.setAttribute('fill', '#2c3e50');
+                    element.setAttribute('font-size', '20');
+                    element.setAttribute('font-family', 'Poppins, sans-serif');
+                    element.textContent = 'Text';
+                    break;
+            }
+            
+            if (element) {
+                element.classList.add('svg-element');
+                element.id = 'element-' + Date.now();
+                canvas.appendChild(element);
+                
+                elements.push({
+                    id: element.id,
+                    element: element,
+                    type: type,
+                    animations: []
+                });
+                
+                selectElement(element);
+                updateElementsList();
+            }
+        }
+
+        function updateShapeWhileDrawing(currentPoint) {
+            if (!selectedElement) return;
+            
+            const width = Math.abs(currentPoint.x - startPoint.x);
+            const height = Math.abs(currentPoint.y - startPoint.y);
+            const minX = Math.min(startPoint.x, currentPoint.x);
+            const minY = Math.min(startPoint.y, currentPoint.y);
+            
+            switch (currentTool) {
+                case 'rect':
+                    selectedElement.setAttribute('x', minX);
+                    selectedElement.setAttribute('y', minY);
+                    selectedElement.setAttribute('width', width);
+                    selectedElement.setAttribute('height', height);
+                    break;
+                    
+                case 'circle':
+                    const radius = Math.sqrt(width * width + height * height) / 2;
+                    selectedElement.setAttribute('r', radius);
+                    break;
+                    
+                case 'ellipse':
+                    selectedElement.setAttribute('rx', width / 2);
+                    selectedElement.setAttribute('ry', height / 2);
+                    selectedElement.setAttribute('cx', startPoint.x + (currentPoint.x - startPoint.x) / 2);
+                    selectedElement.setAttribute('cy', startPoint.y + (currentPoint.y - startPoint.y) / 2);
+                    break;
+                    
+                case 'line':
+                    selectedElement.setAttribute('x2', currentPoint.x);
+                    selectedElement.setAttribute('y2', currentPoint.y);
+                    break;
+                    
+                case 'polygon':
+                    const polyRadius = Math.sqrt(width * width + height * height) / 2;
+                    const points = generatePolygonPoints(startPoint.x, startPoint.y, polyRadius, 6);
+                    selectedElement.setAttribute('points', points);
+                    break;
+            }
+        }
+
+        function finalizeShape() {
+            updateElementsList();
+            updatePropertiesPanel();
+        }
+
+        function generatePolygonPoints(cx, cy, radius, sides) {
+            const points = [];
+            for (let i = 0; i < sides; i++) {
+                const angle = (i * 2 * Math.PI) / sides - Math.PI / 2;
+                const x = cx + radius * Math.cos(angle);
+                const y = cy + radius * Math.sin(angle);
+                points.push(`${x},${y}`);
+            }
+            return points.join(' ');
+        }
+
+        function selectElement(element) {
+            deselectAll();
+            selectedElement = element;
+            element.classList.add('selected');
+            updatePropertiesPanel();
+            
+            // Show keyframe editor if element has animations
+            if (element.querySelector('animate, animateTransform')) {
+                document.getElementById('keyframeEditor').style.display = 'block';
+            } else {
+                document.getElementById('keyframeEditor').style.display = 'none';
+            }
+        }
+
+        function deselectAll() {
+            document.querySelectorAll('.svg-element').forEach(el => {
+                el.classList.remove('selected');
+            });
+            document.querySelectorAll('.element-item').forEach(el => {
+                el.classList.remove('selected');
+            });
+            selectedElement = null;
+            updatePropertiesPanel();
+            document.getElementById('keyframeEditor').style.display = 'none';
+        }
+
+        function updatePropertiesPanel() {
+            const panel = document.getElementById('propertiesContent');
+            
+            if (!selectedElement) {
+                panel.innerHTML = '<p style="padding: 20px; text-align: center; color: #aaa;">Select an element to edit properties</p>';
+                return;
+            }
+            
+            const elementData = elements.find(el => el.element === selectedElement);
+            if (!elementData) return;
+            
+            let html = `<div class="form-group">
+                <label>Type: ${elementData.type.toUpperCase()}</label>
+            </div>`;
+            
+            // Common properties
+            html += `
+                <div class="form-group">
+                    <label>Fill Color:</label>
+                    <input type="color" class="color-input" value="${selectedElement.getAttribute('fill') || '#3498db'}" onchange="updateProperty('fill', this.value)">
+                </div>
+                <div class="form-group">
+                    <label>Stroke Color:</label>
+                    <input type="color" class="color-input" value="${selectedElement.getAttribute('stroke') || '#000000'}" onchange="updateProperty('stroke', this.value)">
+                </div>
+                <div class="form-group">
+                    <label>Stroke Width:</label>
+                    <input type="range" class="form-control" min="0" max="10" value="${selectedElement.getAttribute('stroke-width') || 0}" onchange="updateProperty('stroke-width', this.value)">
+                </div>
+                <div class="form-group">
+                    <label>Opacity:</label>
+                    <input type="range" class="form-control" min="0" max="1" step="0.1" value="${selectedElement.getAttribute('opacity') || 1}" onchange="updateProperty('opacity', this.value)">
+                </div>
+            `;
+            
+            // Special properties based on element type
+            if (elementData.type === 'text') {
+                html += `
+                    <div class="form-group">
+                        <label>Text Content:</label>
+                        <input type="text" class="form-control" value="${selectedElement.textContent}" onchange="updateTextContent(this.value)">
+                    </div>
+                    <div class="form-group">
+                        <label>Font Size:</label>
+                        <input type="range" class="form-control" min="10" max="72" value="${selectedElement.getAttribute('font-size') || 20}" onchange="updateProperty('font-size', this.value + 'px')">
+                    </div>
+                `;
+            }
+            
+            // Transform properties
+            html += `
+                <div class="form-group">
+                    <label>Rotation (degrees):</label>
+                    <input type="range" class="form-control" min="0" max="360" value="0" onchange="updateTransform('rotate', this.value)">
+                </div>
+                <div class="form-group">
+                    <label>Scale:</label>
+                    <input type="range" class="form-control" min="0.1" max="3" step="0.1" value="1" onchange="updateTransform('scale', this.value)">
+                </div>
+            `;
+            
+            // Advanced effects
+            html += `
+                <div style="margin-top: 20px; display: flex; gap: 10px;">
+                    <button class="btn" onclick="addGradient()">Add Gradient</button>
+                    <button class="btn" onclick="addFilter()">Add Filter</button>
+                </div>
+            `;
+            
+            panel.innerHTML = html;
+        }
+
+        function updateProperty(property, value) {
+            if (selectedElement) {
+                selectedElement.setAttribute(property, value);
+            }
+        }
+        
+        function updateTextContent(value) {
+            if (selectedElement && selectedElement.tagName === 'text') {
+                selectedElement.textContent = value;
+            }
+        }
+
+        function updateTransform(type, value) {
+            if (!selectedElement) return;
+            
+            let transform = selectedElement.getAttribute('transform') || '';
+            const bbox = selectedElement.getBBox();
+            const centerX = bbox.x + bbox.width / 2;
+            const centerY = bbox.y + bbox.height / 2;
+            
+            if (type === 'rotate') {
+                transform = transform.replace(/rotate\([^)]*\)/g, '');
+                transform += ` rotate(${value} ${centerX} ${centerY})`;
+            } else if (type === 'scale') {
+                transform = transform.replace(/scale\([^)]*\)/g, '');
+                transform += ` scale(${value})`;
+            }
+            
+            selectedElement.setAttribute('transform', transform.trim());
+        }
+
+        function addMoveAnimation() {
+            if (!selectedElement) return;
+            
+            const animateTransform = document.createElementNS('http://www.w3.org/2000/svg', 'animateTransform');
+            animateTransform.setAttribute('attributeName', 'transform');
+            animateTransform.setAttribute('type', 'translate');
+            animateTransform.setAttribute('values', '0,0; 100,0; 0,0');
+            animateTransform.setAttribute('dur', `${animationDuration}s`);
+            animateTransform.setAttribute('repeatCount', 'indefinite');
+            animateTransform.setAttribute('additive', 'sum');
+            
+            selectedElement.appendChild(animateTransform);
+            updateElementAnimations();
+        }
+
+        function addRotateAnimation() {
+            if (!selectedElement) return;
+            
+            const bbox = selectedElement.getBBox();
+            const centerX = bbox.x + bbox.width / 2;
+            const centerY = bbox.y + bbox.height / 2;
+            
+            const animateTransform = document.createElementNS('http://www.w3.org/2000/svg', 'animateTransform');
+            animateTransform.setAttribute('attributeName', 'transform');
+            animateTransform.setAttribute('type', 'rotate');
+            animateTransform.setAttribute('values', `0 ${centerX} ${centerY}; 360 ${centerX} ${centerY}`);
+            animateTransform.setAttribute('dur', `${animationDuration}s`);
+            animateTransform.setAttribute('repeatCount', 'indefinite');
+            animateTransform.setAttribute('additive', 'sum');
+            
+            selectedElement.appendChild(animateTransform);
+            updateElementAnimations();
+        }
+
+        function addScaleAnimation() {
+            if (!selectedElement) return;
+            
+            const animateTransform = document.createElementNS('http://www.w3.org/2000/svg', 'animateTransform');
+            animateTransform.setAttribute('attributeName', 'transform');
+            animateTransform.setAttribute('type', 'scale');
+            animateTransform.setAttribute('values', '1; 1.5; 1');
+            animateTransform.setAttribute('dur', `${animationDuration}s`);
+            animateTransform.setAttribute('repeatCount', 'indefinite');
+            animateTransform.setAttribute('additive', 'sum');
+            
+            selectedElement.appendChild(animateTransform);
+            updateElementAnimations();
+        }
+
+        function addFadeAnimation() {
+            if (!selectedElement) return;
+            
+            const animate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+            animate.setAttribute('attributeName', 'opacity');
+            animate.setAttribute('values', '1; 0.3; 1');
+            animate.setAttribute('dur', `${animationDuration}s`);
+            animate.setAttribute('repeatCount', 'indefinite');
+            
+            selectedElement.appendChild(animate);
+            updateElementAnimations();
+        }
+
+        function updateElementAnimations() {
+            const elementData = elements.find(el => el.element === selectedElement);
+            if (elementData) {
+                elementData.animations = Array.from(selectedElement.querySelectorAll('animate, animateTransform'));
+                document.getElementById('keyframeEditor').style.display = 'block';
+            }
+        }
+
+        function addKeyframe() {
+            if (!selectedElement) {
+                alert('Please select an element first');
+                return;
+            }
+            
+            const time = Date.now();
+            keyframes.push({
+                element: selectedElement.id,
+                time: time,
+                properties: {
+                    transform: selectedElement.getAttribute('transform') || '',
+                    opacity: selectedElement.getAttribute('opacity') || '1',
+                    fill: selectedElement.getAttribute('fill') || '#000000'
+                }
+            });
+            
+            updateTimelineDisplay();
+        }
+        
+        function removeKeyframe() {
+            if (keyframes.length > 0) {
+                keyframes.pop();
+                updateTimelineDisplay();
+            }
+        }
+
+        function updateTimelineDisplay() {
+            const track = document.getElementById('timelineTrack');
+            track.innerHTML = '<div class="timeline-ruler"></div>';
+            
+            keyframes.forEach((keyframe, index) => {
+                const keyframeEl = document.createElement('div');
+                keyframeEl.className = 'keyframe';
+                keyframeEl.style.left = `${(index * 50) + 20}px`;
+                keyframeEl.title = `Keyframe ${index + 1}`;
+                keyframeEl.onclick = () => selectKeyframe(index);
+                track.appendChild(keyframeEl);
+            });
+        }
+
+        function selectKeyframe(index) {
+            document.querySelectorAll('.keyframe').forEach(k => k.classList.remove('selected'));
+            const keyframe = document.querySelectorAll('.keyframe')[index];
+            if (keyframe) {
+                keyframe.classList.add('selected');
+            }
+        }
+
+        function toggleAnimation() {
+            const btn = document.querySelector('.play-btn');
+            
+            if (isAnimating) {
+                // Stop animation
+                document.querySelectorAll('animate, animateTransform').forEach(anim => {
+                    anim.endElement();
+                });
+                btn.classList.remove('playing');
+                btn.classList.add('paused');
+                isAnimating = false;
+            } else {
+                // Start animation
+                document.querySelectorAll('animate, animateTransform').forEach(anim => {
+                    anim.beginElement();
+                });
+                btn.classList.remove('paused');
+                btn.classList.add('playing');
+                isAnimating = true;
+            }
+        }
+
+        function resetAnimation() {
+            document.querySelectorAll('animate, animateTransform').forEach(anim => {
+                anim.endElement();
+            });
+            keyframes = [];
+            updateTimelineDisplay();
+            const btn = document.querySelector('.play-btn');
+            btn.classList.remove('playing');
+            btn.classList.add('paused');
+            isAnimating = false;
+        }
+
+        function updateElementsList() {
+            const list = document.getElementById('elementsList');
+            list.innerHTML = '';
+            
+            elements.forEach((elementData, index) => {
+                const item = document.createElement('div');
+                item.className = 'element-item';
+                if (elementData.element === selectedElement) {
+                    item.classList.add('selected');
+                }
+                
+                // Icon based on element type
+                let icon = '⬢';
+                if (elementData.type === 'rect') icon = '▭';
+                if (elementData.type === 'circle') icon = '●';
+                if (elementData.type === 'text') icon = 'T';
+                if (elementData.type === 'line') icon = '╱';
+                if (elementData.type === 'path') icon = '⤡';
+                
+                item.innerHTML = `
+                    <span>${icon} ${elementData.type.toUpperCase()} ${index + 1}</span>
+                    <div class="element-actions">
+                        <button onclick="toggleElementVisibility('${elementData.id}')" title="Toggle Visibility">👁️</button>
+                        <button onclick="duplicateElement('${elementData.id}')" title="Duplicate">⎘</button>
+                        <button onclick="deleteElement('${elementData.id}')" title="Delete">✕</button>
+                    </div>
+                `;
+                
+                item.onclick = (e) => {
+                    if (e.target.tagName !== 'BUTTON') {
+                        selectElement(elementData.element);
+                        updateElementsList();
+                    }
+                };
+                
+                list.appendChild(item);
+            });
+            
+            document.getElementById('elementCount').textContent = `Elements: ${elements.length}`;
+        }
+
+        function toggleElementVisibility(id) {
+            const elementData = elements.find(el => el.id === id);
+            if (elementData) {
+                const currentOpacity = elementData.element.getAttribute('opacity') || '1';
+                const newOpacity = currentOpacity === '0' ? '1' : '0';
+                elementData.element.setAttribute('opacity', newOpacity);
+            }
+        }
+
+        function duplicateElement(id) {
+            const elementData = elements.find(el => el.id === id);
+            if (elementData) {
+                const clone = elementData.element.cloneNode(true);
+                clone.id = 'element-' + Date.now();
+                
+                // Offset position slightly
+                const transform = clone.getAttribute('transform') || '';
+                clone.setAttribute('transform', transform + ' translate(20, 20)');
+                
+                document.getElementById('canvas').appendChild(clone);
+                
+                elements.push({
+                    id: clone.id,
+                    element: clone,
+                    type: elementData.type,
+                    animations: []
+                });
+                
+                updateElementsList();
+            }
+        }
+
+        function deleteElement(id) {
+            const index = elements.findIndex(el => el.id === id);
+            if (index !== -1) {
+                elements[index].element.remove();
+                elements.splice(index, 1);
+                updateElementsList();
+                
+                if (selectedElement && selectedElement.id === id) {
+                    selectedElement = null;
+                    updatePropertiesPanel();
+                }
+            }
+        }
+
+        function deleteSelectedElement() {
+            if (selectedElement) {
+                deleteElement(selectedElement.id);
+            }
+        }
+
+        function clearCanvas() {
+            if (confirm('Are you sure you want to clear the canvas? This action cannot be undone.')) {
+                document.querySelectorAll('.svg-element').forEach(el => el.remove());
+                elements = [];
+                selectedElement = null;
+                keyframes = [];
+                updateElementsList();
+                updatePropertiesPanel();
+                updateTimelineDisplay();
+            }
+        }
+
+        function showExportPanel() {
+            const canvas = document.getElementById('canvas');
+            const svgCode = new XMLSerializer().serializeToString(canvas);
+            
+            // Format the code for better readability
+            const formattedCode = formatSVGCode(svgCode);
+            
+            document.getElementById('exportCode').textContent = formattedCode;
+            document.getElementById('overlay').style.display = 'block';
+            document.getElementById('exportPanel').style.display = 'block';
+        }
+
+        function formatSVGCode(code) {
+            // Simple formatting
+            return code
+                .replace(/></g, '>\n<')
+                .replace(/\n\s*\n/g, '\n')
+                .replace(/^/gm, '  ')
+                .replace(/<defs>(.*?)<\/defs>/gs, (match, p1) => {
+                    return `<defs>\n${p1.replace(/></g, '>\n<')}\n</defs>`;
+                });
+        }
+
+        function hideExportPanel() {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('exportPanel').style.display = 'none';
+        }
+
+        function copyToClipboard() {
+            const code = document.getElementById('exportCode').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('SVG code copied to clipboard!');
+            });
+        }
+
+        function downloadSVG() {
+            const code = document.getElementById('exportCode').textContent;
+            const blob = new Blob([code], { type: 'image/svg+xml' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'animation.svg';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importSVG() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.svg';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        try {
+                            const parser = new DOMParser();
+                            const svgDoc = parser.parseFromString(e.target.result, 'image/svg+xml');
+                            const importedSVG = svgDoc.documentElement;
+                            
+                            // Import elements
+                            const svgElements = importedSVG.querySelectorAll('rect, circle, ellipse, line, polygon, path, text');
+                            svgElements.forEach(el => {
+                                const clone = el.cloneNode(true);
+                                clone.classList.add('svg-element');
+                                clone.id = 'element-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+                                
+                                document.getElementById('canvas').appendChild(clone);
+                                
+                                elements.push({
+                                    id: clone.id,
+                                    element: clone,
+                                    type: clone.tagName.toLowerCase(),
+                                    animations: []
+                                });
+                            });
+                            
+                            updateElementsList();
+                            alert('SVG imported successfully!');
+                        } catch (error) {
+                            alert('Error importing SVG: ' + error.message);
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            };
+            input.click();
+        }
+
+        function showTutorial() {
+            document.getElementById('tutorialPanel').style.display = 'block';
+        }
+
+        function hideTutorial() {
+            document.getElementById('tutorialPanel').style.display = 'none';
+        }
+
+        // Initialize with select tool
+        selectTool('select');
+    </script>
+</body>
+</html>
